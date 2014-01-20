@@ -1,0 +1,33 @@
+{
+  "name": "dualapi",
+  "version": "0.0.0",
+  "description": "Dual REST API",
+  "main": "dualapi.js",
+  "scripts": {
+    "test": "mocha"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/plediii/dualapi.git"
+  },
+  "keywords": [
+    "dual",
+    "rest",
+    "api",
+    "websocket",
+    "websockets",
+    "socket.io",
+    "client",
+    "server"
+  ],
+  "author": "Paul J. Ledbetter III",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/plediii/dualapi/issues"
+  },
+  "devDependencies": {
+    "mocha": "~1.17.0",
+    "grunt": "~0.4.2",
+    "grunt-contrib-jshint": "~0.8.0"
+  }
+}
