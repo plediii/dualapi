@@ -5,7 +5,7 @@ var _ = require('underscore');
 
 
 var exampleHost = function () {
-    var doc = xml.doc(xml.elt('bands'));
+    var doc = xml.doc(xml.elt('doc'));
 
     var host = new dual.Host();
     host.action('get')
@@ -17,7 +17,7 @@ var exampleHost = function () {
     host.action('put')
         .route(['site'])
         .use(function (route, msg) {
-            xml.docSet(route, msg);
+            xml.setNode(xml.docGet(route), msg);
         });
 
     host.doc = doc;
@@ -29,6 +29,6 @@ var hostB = exampleHost();
 
 hostA.serve(hostB);
 
-hostA.trigger('put', ['site', 'bands'], xml.elt('beatles'));
-hostB.emit('get', ['site', 'bands']);
+hostA.trigger('put', ['site', 'doc'], xml.elt('bands', [xml.elt('beatles'), xml.elt('doors')]));
+hostB.emit('get', ['site', 'doc', 'bands']);
 console.log(hostB.doc.root);
