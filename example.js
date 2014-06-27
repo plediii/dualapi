@@ -2,6 +2,7 @@
 var xml = require('xml4node');
 var dual = require('./index');
 var _ = require('underscore');
+var EventEmitter = require('events').EventEmitter;
 
 
 var exampleHost = function () {
@@ -27,7 +28,36 @@ var exampleHost = function () {
 var hostA = exampleHost();
 var hostB = exampleHost();
 
-hostA.serve(hostB);
+if (true) {
+    var socket = (function () {
+        
+        var sideA = new EventEmitter();
+        var sideB = new EventEmitter();
+        
+        _.extend(sideA, {
+            trigger: function () {
+                sideB.emit.apply(sideB, arguments);
+            }
+        });
+
+        _.extend(sideB, {
+            trigger: function () {
+                sideA.emit.apply(sideA, arguments);
+            }
+        });
+
+        return {
+            sideA: sideA
+            , sideB: sideB;
+        }
+    })();
+
+    hostA.serve(socket.sideA);
+    hostB.serve(socket.sideB);
+}
+else {
+    hostA.serve(hostB);
+}
 
 hostA.trigger('put', ['site', 'doc'], xml.elt('bands', [xml.elt('beatles'), xml.elt('doors')]));
 hostB.emit('get', ['site', 'doc', 'bands']);
