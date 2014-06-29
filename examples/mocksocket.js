@@ -1,6 +1,6 @@
 
 var xml = require('xml4node');
-var dual = require('./index');
+var dual = require('../index');
 var _ = require('underscore');
 var EventEmitter = require('events').EventEmitter;
 
@@ -39,46 +39,39 @@ var exampleHost = function () {
     return host;
 };
 
+var socket = (function () {
+    
+    var sideA = new EventEmitter();
+    var sideB = new EventEmitter();
+    
+    _.extend(sideA, {
+        trigger: function () {
+            sideB.emit.apply(sideB, arguments);
+        }
+    });
+
+    _.extend(sideB, {
+        trigger: function () {
+            sideA.emit.apply(sideA, arguments);
+        }
+    });
+
+    return {
+        sideA: sideA
+        , sideB: sideB
+    }
+})();
+
 var hostA = exampleHost();
 var hostB = exampleHost();
 
 hostA.trigger('put', ['site', 'doc'], xml.elt('bands', [xml.elt('beatles'), xml.elt('doors')]));
-
-if (true) {
-    var socket = (function () {
-        
-        var sideA = new EventEmitter();
-        var sideB = new EventEmitter();
-        
-        _.extend(sideA, {
-            trigger: function () {
-                sideB.emit.apply(sideB, arguments);
-            }
-        });
-
-        _.extend(sideB, {
-            trigger: function () {
-                sideA.emit.apply(sideA, arguments);
-            }
-        });
-
-        return {
-            sideA: sideA
-            , sideB: sideB
-        }
-    })();
-
-    hostA.serve(socket.sideA);
-    hostB.serve(socket.sideB);
-    socket.sideB.trigger('watch', ['site', 'doc']);
-}
-else {
-    hostA.serve(hostB);
-    hostB.emit('watch', ['site', 'doc']);
-}
+hostA.serve(socket.sideA);
+hostB.serve(socket.sideB);
+socket.sideB.trigger('watch', ['site', 'doc']);
 
 hostA.trigger('put', ['site', 'doc'], xml.elt('bands', [xml.elt('beatles'), xml.elt('doors')]));
 
 
-console.log(hostA.doc.root);
-console.log(hostB.doc.root);
+console.log('Host A document: ', xml.docToString(hostA.doc));
+console.log('Host B document: ', xml.docToString(hostB.doc));
