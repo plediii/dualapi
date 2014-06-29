@@ -24,6 +24,17 @@ var exampleHost = function () {
             xml.setNode(xml.docGet(doc, route), msg);
         });
 
+    host.action('watch')
+        .route(['site'])
+        .use(function (route, msg, remote) {
+            host.action('put')
+                .route(['site'].concat(route))
+                .use(function (target, msg) {
+                    remote.trigger('put', ['site'].concat(route, target), msg);
+                });
+        });
+
+
     host.doc = doc;
     return host;
 };
@@ -59,12 +70,14 @@ if (true) {
 
     hostA.serve(socket.sideA);
     hostB.serve(socket.sideB);
-    socket.sideB.trigger('get', ['site', 'doc', 'bands']);
+    socket.sideB.trigger('watch', ['site', 'doc']);
 }
 else {
     hostA.serve(hostB);
-    hostB.emit('get', ['site', 'doc', 'bands']);
+    hostB.emit('watch', ['site', 'doc']);
 }
+
+hostA.trigger('put', ['site', 'doc'], xml.elt('bands', [xml.elt('beatles'), xml.elt('doors')]));
 
 
 console.log(hostA.doc.root);
