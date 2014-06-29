@@ -15,7 +15,7 @@ module.exports = function(grunt) {
                              , 'before': false
                            }
             }
-            , all: [ '*.js', 'src/*.js', 'test/*.js']
+            , all: [ '*.js', 'src/*.js', 'test/*.js', 'examples/*.js']
         }
     });
 
