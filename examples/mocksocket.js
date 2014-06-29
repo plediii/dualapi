@@ -1,3 +1,5 @@
+/*jslint node: true */
+"use strict";
 
 var xml = require('xml4node');
 var dual = require('../index');
@@ -59,7 +61,7 @@ var socket = (function () {
     return {
         sideA: sideA
         , sideB: sideB
-    }
+    };
 })();
 
 var hostA = exampleHost();

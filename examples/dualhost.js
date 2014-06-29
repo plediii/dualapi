@@ -1,3 +1,5 @@
+/*jslint node: true */
+"use strict";
 
 var xml = require('xml4node');
 var dual = require('../index');
