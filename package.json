@@ -29,5 +29,9 @@
     "mocha": "~1.17.0",
     "grunt": "~0.4.2",
     "grunt-contrib-jshint": "~0.8.0"
+  },
+  "dependencies": {
+    "underscore": "^1.6.0",
+    "xml4node": "git://github.com/plediii/xml4node.git#master"
   }
 }

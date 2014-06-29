@@ -25,21 +25,21 @@ _.extend(Host.prototype, {
             }
         };
     }
-    , trigger: function (name, route, msg, remote) {
+    , trigger: function (name, target, msg, remote) {
         var _this = this;
         _.each(_this.actions[name], function (routecb) {
             var route = routecb[0];
             var cb = routecb[1];
-            if (_.deepEqual(route, target.slice(0, route.length))) {
-                cb(target.slice(route.length), msg, _this);
+            if (_.isEqual(route, target.slice(0, route.length))) {
+                cb(target.slice(route.length), msg, remote);
             }
         });
     }
     , serve: function (remote) {
         var _this = this;
-        _.each(_this.actions, function (name) function () {
+        _.each(_this.actions, function (routes, name) {
             remote.on(name, function (target, msg) {
-                _this.trigger(name, route, msg, _this);
+                _this.trigger(name, target, msg, remote);
             });
         });
     }
