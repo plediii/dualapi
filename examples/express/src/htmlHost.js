@@ -3,10 +3,12 @@
 var dual = require('dualapi');
 var xml = require('xml4node');
 
-console.log(dual);
-console.log(xml);
-console.log(xml.parseString("<root> hello </root>"));
-
+var socket = require('socket.io-client')();
+socket.on('connect', function(){
+    console.log('socket connected');
+    socket.on('event', function(data){});
+    socket.on('disconnect', function(){});
+});
 
 var _ = require('underscore');
 var EventEmitter = require('events').EventEmitter;

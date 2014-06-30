@@ -1,10 +1,13 @@
 var express = require('express');
 var path = require('path');
 var logger = require('morgan');
-
+var _ = require('underscore')
 var routes = require('./routes/index');
 
 var app = express();
+var http = require('http');
+var httpapp = http.createServer(app);
+var io = require('socket.io')(httpapp);
 
 // view engine setup
 app.set('views', path.join(__dirname, 'views'));
@@ -46,5 +49,7 @@ app.use(function(err, req, res, next) {
     });
 });
 
-
-module.exports = app;
+_.extend(exports, {
+    app: app
+    , http: httpapp
+});
