@@ -7,7 +7,18 @@ var routes = require('./routes/index');
 var app = express();
 var http = require('http');
 var httpapp = http.createServer(app);
+var dual = require('dualapi');
 var io = require('socket.io')(httpapp);
+
+var docHost = require('./hosts/docHost')();
+
+io.on('connection', function(socket){
+    console.log('a user connected');
+    docHost.serve(dual.socketHost(socket));
+    socket.on('disconnect', function(){
+        console.log('user disconnected');
+    });
+});
 
 // view engine setup
 app.set('views', path.join(__dirname, 'views'));
