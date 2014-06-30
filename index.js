@@ -47,6 +47,16 @@ _.extend(Host.prototype, {
     }
 });
 
+var socketHost = function (socket) {
+    socket.trigger = function () {
+        socket.emit.apply(socket, arguments);
+    };
+    return socket;
+};
+
 _.extend(exports, {
     Host: Host
+    , socketHost: socketHost
 });
+
+
