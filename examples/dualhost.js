@@ -21,8 +21,7 @@ var exampleHost = function (mount) {
                 var docRoute = ['doc'].concat(route);
                 var targetNode = xml.docGet(doc, docRoute);
                 if (targetNode) {
-                    var remoteRoute = remote.concat(_.initial(route));
-                    host.emit('put', remoteRoute, xml.nodeToString(targetNode));
+                    host.emit('put', remote, xml.nodeToString(targetNode));
                 }
             }
         });
@@ -58,7 +57,13 @@ console.log('Host B document: ', xml.docToString(hostB.doc));
 
 
 hostA.trigger('put', ['A', 'bands'], xml.elt('nirvana'));
-console.log('After PUTs:');
+console.log('After PUT:');
+console.log('Host A document: ', xml.docToString(hostA.doc));
+console.log('Host B document: ', xml.docToString(hostB.doc));
+
+
+hostA.trigger('get', ['A', 'bands', 'nirvana'], null, ['B', 'bands']);
+console.log('After sub tree GET:');
 console.log('Host A document: ', xml.docToString(hostA.doc));
 console.log('Host B document: ', xml.docToString(hostB.doc));
 
