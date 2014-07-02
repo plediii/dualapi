@@ -37,10 +37,10 @@ _.extend(Host.prototype, {
             }
         });
     }
-    , serve: function (remote) {
+    , serve: function (remoteHost) {
         var _this = this;
         _.each(_this.actions, function (routes, name) {
-            remote.on(name, function (target, msg) {
+            remoteHost.on(name, function (target, msg, remote) {
                 _this.trigger(name, target, msg, remote);
             });
         });
