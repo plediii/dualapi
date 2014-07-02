@@ -9371,6 +9371,8 @@ socket.on('connect', function(){
     socketHost.trigger('watch', ['site', 'doc']);
 });
 
+window.socketHost = socketHost;
+
 },{"dualapi":2,"socket.io-client":4,"xml4node":46}],50:[function(require,module,exports){
 /*!
  * The buffer module from node.js, for the browser.

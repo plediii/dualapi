@@ -26,3 +26,5 @@ raster.serve(socketHost);
 socket.on('connect', function(){
     socketHost.trigger('watch', ['site', 'doc']);
 });
+
+window.socketHost = socketHost;
