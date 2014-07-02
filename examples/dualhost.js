@@ -7,47 +7,63 @@ var _ = require('underscore');
 var EventEmitter = require('events').EventEmitter;
 
 
-var exampleHost = function () {
+var exampleHost = function (mount) {
+    if (!_.isArray(mount)) {
+        throw 'Bad mount point.';
+    }
     var doc = xml.doc(xml.elt('doc'));
 
     var host = new dual.Host();
     host.action('get')
-        .route(['site'])
+        .route(mount)
         .use(function (route, msg, remote) {
-            var targetNode = xml.docGet(doc, route);
-            if (targetNode) {
-                remote.trigger('put', ['site'].concat(_.initial(route)), xml.nodeToString(targetNode));
+            if (_.isArray(remote)) {
+                var docRoute = ['doc'].concat(route);
+                var targetNode = xml.docGet(doc, docRoute);
+                if (targetNode) {
+                    var remoteRoute = remote.concat(_.initial(route));
+                    host.emit('put', remoteRoute, xml.nodeToString(targetNode));
+                }
             }
         });
 
     host.action('put')
-        .route(['site'])
+        .route(mount)
         .use(function (route, msg) {
-            xml.setNode(xml.docGet(doc, route), msg);
+            var docRoute = ['doc'].concat(route);
+            var hostRoute = mount.concat(route);
+            xml.setNode(xml.docGet(doc, docRoute), msg);
+            host.emit('put', hostRoute, msg);
         });
-
-    host.action('watch')
-        .route(['site'])
-        .use(function (route, msg, remote) {
-            host.action('put')
-                .route(['site'].concat(route))
-                .use(function (target, msg) {
-                    remote.trigger('put', ['site'].concat(route, target), msg);
-                });
-        });
-
 
     host.doc = doc;
     return host;
 };
 
-var hostA = exampleHost();
-var hostB = exampleHost();
+var hostA = exampleHost(['A']);
+var hostB = exampleHost(['B']);
 
-hostA.trigger('put', ['site', 'doc'], xml.elt('bands', [xml.elt('beatles'), xml.elt('doors')]));
+hostB.serve(hostA);
 hostA.serve(hostB);
-hostB.emit('watch', ['site', 'doc']);
-hostA.trigger('put', ['site', 'doc'], xml.elt('bands', [xml.elt('beatles'), xml.elt('doors')]));
+hostA.trigger('put', ['A'], xml.elt('bands', [xml.elt('beatles'), xml.elt('doors')]));
 
+console.log('Initially:');
 console.log('Host A document: ', xml.docToString(hostA.doc));
 console.log('Host B document: ', xml.docToString(hostB.doc));
+
+hostA.trigger('get', ['A', 'bands'], null, ['B']);
+console.log('After get request:');
+console.log('Host A document: ', xml.docToString(hostA.doc));
+console.log('Host B document: ', xml.docToString(hostB.doc));
+
+
+hostA.trigger('put', ['A', 'bands'], xml.elt('nirvana'));
+console.log('After PUTs:');
+console.log('Host A document: ', xml.docToString(hostA.doc));
+console.log('Host B document: ', xml.docToString(hostB.doc));
+
+
+_.extend(exports, {
+    hostA: hostA
+    , hostB: hostB
+});
