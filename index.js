@@ -45,6 +45,11 @@ _.extend(Host.prototype, {
             });
         });
     }
+    , connect: function (remoteHost) {
+        var _this = this;
+        _this.serve(remoteHost);
+        remoteHost.serve(_this);
+    }
 });
 
 var socketHost = function (socket) {
