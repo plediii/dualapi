@@ -50,7 +50,7 @@ console.log('Initially:');
 console.log('Host A document: ', xml.docToString(hostA.doc));
 console.log('Host B document: ', xml.docToString(hostB.doc));
 
-hostA.trigger('get', ['A', 'bands'], null, ['B']);
+hostB.emit('get', ['A', 'bands'], null, ['B']);
 console.log('After get request:');
 console.log('Host A document: ', xml.docToString(hostA.doc));
 console.log('Host B document: ', xml.docToString(hostB.doc));
@@ -62,7 +62,7 @@ console.log('Host A document: ', xml.docToString(hostA.doc));
 console.log('Host B document: ', xml.docToString(hostB.doc));
 
 
-hostA.trigger('get', ['A', 'bands', 'nirvana'], null, ['B', 'bands']);
+hostB.emit('get', ['A', 'bands', 'nirvana'], null, ['B', 'bands']);
 console.log('After sub tree GET:');
 console.log('Host A document: ', xml.docToString(hostA.doc));
 console.log('Host B document: ', xml.docToString(hostB.doc));
