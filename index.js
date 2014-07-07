@@ -5,52 +5,68 @@ var _ = require('underscore');
 var EventEmitter = require('events').EventEmitter;
 var inherits = require('util').inherits;
 
-var Host = function () {
+var Host = function (mount) {
     var _this = this;
-    _this.actions = {};
+    _this.mount = mount;
+    EventEmitter.apply(_this);
+    _this.hosts = {};
 };
 
 inherits(Host, EventEmitter);
 
 _.extend(Host.prototype, {
-    action: function (name) {
+    send: function (to, ctxt) {
         var _this = this;
-        _this.actions[name] = _this.actions[name] || [];
-        var routes = _this.actions[name];
-        return {
-            route: function (route) {
-                return {
-                    use: function (cb) {
-                        routes.push([route, cb]);
-                    }
-                };
-            }
-        };
+        var next = _.head(to);
+        if (_this.hosts.hasOwnProperty(next)) {
+            _this.hosts[next].send(_.tail(to), ctxt);
+        }
     }
-    , trigger: function (name, target, msg, remote) {
+    , host: function (mount, obj) {
         var _this = this;
-        _.each(_this.actions[name], function (routecb) {
-            var route = routecb[0];
-            var cb = routecb[1];
-            if (_.isEqual(route, target.slice(0, route.length))) {
-                cb(target.slice(route.length), msg, remote);
-            }
-        });
+        if (obj) {
+            _this.hosts[mount] = obj;
+            return obj;
+        }
+        else if (!_this.hosts.hasOwnProperty(mount)) {
+            _this.hosts[mount] = new Host(mount);
+        }
+        return _this.hosts[mount];
     }
-    , serve: function (remoteHost) {
+    , endpoint: function (mount, proto) {
         var _this = this;
-        _.each(_this.actions, function (routes, name) {
-            remoteHost.on(name, function (target, msg, remote) {
-                _this.trigger(name, target, msg, remote);
-            });
-        });
-    }
-    , connect: function (remoteHost) {
-        var _this = this;
-        _this.serve(remoteHost);
-        remoteHost.serve(_this);
+        if (!_this.hosts.hasOwnProperty(mount)) {
+            _this.hosts[mount] = new Endpoint(mount, proto);
+        }
+        _this.hosts[mount];
     }
 });
+
+var MessageContext = function (domain, to, from, body) {
+    var _this = this;
+    _this.domain = domain;
+    _this.to = to;
+    _this.from = from;
+    _this.body = body;
+};
+
+var Endpoint = function (mount, proto) {
+    var _this = this;
+    _this.mount = mount;
+    _this.proto = proto;
+};
+
+_.extend(Endpoint.prototype, {
+    send: function (to, ctxt) {
+        var _this = this;
+        var next = _.head(to);
+        if (_this.proto.hasOwnProperty(next)) {
+            _this.proto[next](to, ctxt);
+        }
+    }
+});
+
+inherits(Endpoint, Host);
 
 var socketHost = function (socket) {
     socket.trigger = function () {
@@ -59,9 +75,38 @@ var socketHost = function (socket) {
     return socket;
 };
 
-_.extend(exports, {
-    Host: Host
-    , socketHost: socketHost
+var Domain = function () {
+    Host.apply(this);
+};
+
+inherits(Domain, Host);
+
+_.extend(Domain.prototype, {
+    send: function (to, from, body) {
+        var _this = this;
+        var next = _.head(to);
+        if (_this.hosts.hasOwnProperty(next)) {
+            _this.hosts[next].send(_.tail(to), new MessageContext(_this, to, [], body));
+        }
+    }
 });
+
+var domain = function () {
+    var d = new Host();
+    var hosts = {};
+
+    return {
+        host: function (mount) {
+            var h = new Host(mount);
+            hosts[mount] = h;
+            h.serve(d);
+            return h;
+        }
+    };
+};
+
+module.exports = function () {
+    return new Domain();
+};
 
 
