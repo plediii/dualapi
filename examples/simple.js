@@ -6,8 +6,7 @@ var domain = dual();
 
 domain
     .host('greeting')
-    .host('english')
-    .endpoint({
+    .endpoint('english', {
         hello: function (ctxt) {
             ctxt.reply('Hello');
         }
@@ -18,8 +17,7 @@ domain
 
 domain
     .host('greeting')
-    .host('francais')
-    .endpoint({
+    .endpoint('francais', {
         hello: function (ctxt) {
             ctxt.reply('Bonjour');
         }
@@ -30,20 +28,20 @@ domain
 
 domain
     .get(['greeting', 'english', 'hello'])
-    .response(function (ctxt) {
-        console.log(body)
+    .then(function (ctxt) {
+        console.log(ctxt.body)
     });
 
 domain
     .get(['greeting', 'francais', 'goodbye'])
-    .response(function (ctxt) {
+    .then(function (ctxt) {
         console.log(ctxt.body);
     });
 
-domain
-    .pipe(['greeting', 'francais'])
-    .send(['hello'])
-    .on('message', function (ctxt) {
-        console.log('from pipe ', ctxt.body);
-        ctxt.pipe.close();
-    });
+// domain
+//     .pipe(['greeting', 'francais'])
+//     .send(['hello'])
+//     .on('message', function (ctxt) {
+//         console.log('from pipe ', ctxt.body);
+//         ctxt.pipe.close();
+//     });
