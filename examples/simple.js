@@ -26,6 +26,7 @@ domain
         }
 });
 
+
 domain
     .get(['greeting', 'english', 'hello'])
     .then(function (ctxt) {
@@ -38,10 +39,18 @@ domain
         console.log(ctxt.body);
     });
 
-// domain
-//     .pipe(['greeting', 'francais'])
-//     .send(['hello'])
-//     .on('message', function (ctxt) {
-//         console.log('from pipe ', ctxt.body);
-//         ctxt.pipe.close();
-//     });
+domain
+    .broadcaster('greetcast', function (ctxt, allow) {
+        allow(true);
+    });
+
+domain
+    .live(['greetcast'])
+    .then(function (greetcast) {
+        greetcast.on('message', function (ctxt) {
+            console.log('broadcast: ', ctxt.body);
+        });
+    });
+
+domain
+    .broadcast.emit(['greetcast'], ['greetcast'], 'HELLOOOO');
