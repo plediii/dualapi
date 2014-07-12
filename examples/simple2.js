@@ -2,45 +2,66 @@
 
 var dual = require('../index');
 
-var serverDomain = dual();
-var allenDomain = dual();
+var server = dual();
+var alice = dual();
 
-serverDomain
-    .host('greeting')
-    .host('english')
-    .endpoint({
-        hello: function (to, from, body) {
-            this.root.send(from, [], 'Hello.');
+server
+    .mount(['greeting', 'english'], {
+        hello: function (ctxt) {
+            ctxt.reply('Hello');
         }
-        , goodbye: function (to, from, body) {
-            this.root.send(from, [], 'Goodbye.');
+        , goodbye: function (ctxt) {
+            ctxt.reply('Goodbye');
         }
     });
 
-serverDomain
-    .host('greeting')
-    .host('francais')
-    .endpoint({
-        hello: function (to, from, body) {
-            this.root.send(from, [], 'Bonjour.');
+server
+    .mount(['greeting', 'francais'], {
+        hello: function (ctxt) {
+            ctxt.reply('Bonjour');
         }
-        , goodbye: function (to, from, body) {
-            this.root.send(from, [], 'Au revoir.');
+        , goodbye: function (ctxt) {
+            ctxt.reply('Au revoir');
         }
-});
+    });
 
-serverDomain.connect('clientAllen', allenDomain);
-allenDomain.connect('server', serverDomain);
 
-allenDomain
+server
+    .mount(['alice', '**'], function (ctxt) {
+        alice.send(ctxt.to.slice(1), ['server'].concat(ctxt.from), ctxt.body);
+    });
+
+alice
+    .mount(['server', '**'], function (ctxt) {
+        server.send(ctxt.to.slice(1), ['alice'].concat(ctxt.from), ctxt.body);
+    });
+
+
+alice
     .get(['server', 'greeting', 'english', 'hello'])
-    .response(function (from, body) {
-        console.log(body);
+    .then(function (ctxt) {
+        console.log(ctxt.body)
     });
 
-allenDomain
+alice
     .get(['server', 'greeting', 'francais', 'goodbye'])
-    .response(function (from, body) {
-        console.log(body)
+    .then(function (ctxt) {
+        console.log(ctxt.body);
+    });
+
+
+server
+    .mount(['greetcast'], dual.broadcaster(function (ctxt, allow) {
+        allow(true);
+    }));
+
+alice
+    .live(['server', 'greetcast'])
+    .then(function (greetcast) {
+        greetcast.on('message', function (ctxt) {
+            console.log('broadcast: ', ctxt.body);
+        });
+        server
+            .send(['greetcast', 'broadcast'], [], 'HELLOOOO');
     });
 
