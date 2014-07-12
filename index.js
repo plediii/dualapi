@@ -19,9 +19,33 @@ var MessageContext = function (options) {
 _.extend(MessageContext.prototype, {
     reply: function (body) {
         var _this = this;
-        _this.domain.send(_this.from, _this.to, body);
+        return _this.domain.send(_this.from, _this.to, body);
+    }
+    , forward: function (to) {
+        var _this = this;
+        return _this.domain.send(to, _this.from, _this.body);
     }
 });
+
+var broadcaster = function (allower) {
+    
+    var subscribers = [];
+
+    return {
+        subscribe: function (ctxt) {
+            return allower(ctxt, function (allow) {
+                if (allow) {
+                    subscribers.push(ctxt.from);
+                }
+            });
+        }
+        , broadcast: function (ctxt) {
+            subscribers = _.filter(subscribers, function (to) {
+                return ctxt.forward(to);
+            });
+        }
+    };
+};
 
 var Domain = function () {
     var _this = this;
@@ -57,8 +81,10 @@ _.extend(Domain.prototype, {
             , from: from
             , body: body
         })) {
-            throw 'No such host on this domain' + JSON.stringify(to);
+            console.error('Dropped message: ', JSON.stringify(to));
+            return false;
         }
+        return true;
     }
     , nextid: function () {
         return '' + ((this.uid)++);
@@ -77,31 +103,33 @@ _.extend(Domain.prototype, {
             return domain.send(to, from);
         });
     }
-    // , live: function (to) {
-    //     var _this = this;
-    //     var domain = _this;
-    //     return new Promise(function (resolve, reject) {
-    //         var from = [_this.nextid()];
-    //         domain.once(from, function (ctxt) {
-    //             if (ctxt.error) {
-    //                 return reject(ctxt.error);
-    //             }
-    //             var liveEmitter = new EventEmitter2();
-    //             resolve(liveEmitter);
-    //             var forwarder =  function (ctxt) {
-    //                 liveEmitter.emit('message', new MessageContext(ctxt));
-    //             };
-    //             domain.on(from, forwarder);
-    //         });
-    //         if (!domain.send(to, from)) {
-    //             reject('No such host on this domain.');
-    //         }
-    //     });
-    // }
+    , live: function (to) {
+        var _this = this;
+        var domain = _this;
+        return new Promise(function (resolve, reject) {
+            var from = [_this.nextid()];
+            var liveEmitter = new EventEmitter2();
+            var forwarder =  function (ctxt) {
+                liveEmitter.emit('message', new MessageContext(ctxt));
+            };
+            domain.on(from, forwarder);
+            if (!domain.send(to.concat('subscribe'), from)) {
+                domain.off(from, forwarder);
+                reject('No route to publisher: ', JSON.stringify(to));
+            }
+            else {
+                resolve(liveEmitter);
+            }
+        });
+    }
 });
 
 module.exports = function () {
     return new Domain();
 };
+
+_.extend(module.exports, {
+    broadcaster: broadcaster
+});
 
 

@@ -36,18 +36,18 @@ domain
         console.log(ctxt.body);
     });
 
-// domain
-//     .mount(['greetcast'], dual.broadcaster(function (ctxt, allow) {
-//         allow(true);
-//     }));
+domain
+    .mount(['greetcast'], dual.broadcaster(function (ctxt, allow) {
+        allow(true);
+    }));
 
-// domain
-//     .live(['greetcast'])
-//     .then(function (greetcast) {
-//         greetcast.on('message', function (ctxt) {
-//             console.log('broadcast: ', ctxt.body);
-//         });
-//     });
+domain
+    .live(['greetcast'])
+    .then(function (greetcast) {
+        greetcast.on('message', function (ctxt) {
+            console.log('broadcast: ', ctxt.body);
+        });
+        domain
+            .send(['greetcast', 'broadcast'], [], 'HELLOOOO');
+    });
 
-// domain
-//     .send(['greetcast', 'broadcast'], [], 'HELLOOOO');
