@@ -5,8 +5,7 @@ var dual = require('../index');
 var domain = dual();
 
 domain
-    .host('greeting')
-    .endpoint('english', {
+    .mount(['greeting', 'english'], {
         hello: function (ctxt) {
             ctxt.reply('Hello');
         }
@@ -16,16 +15,14 @@ domain
     });
 
 domain
-    .host('greeting')
-    .endpoint('francais', {
+    .mount(['greeting', 'francais'], {
         hello: function (ctxt) {
             ctxt.reply('Bonjour');
         }
         , goodbye: function (ctxt) {
             ctxt.reply('Au revoir');
         }
-});
-
+    });
 
 domain
     .get(['greeting', 'english', 'hello'])
@@ -39,18 +36,18 @@ domain
         console.log(ctxt.body);
     });
 
-domain
-    .broadcaster('greetcast', function (ctxt, allow) {
-        allow(true);
-    });
+// domain
+//     .mount(['greetcast'], dual.broadcaster(function (ctxt, allow) {
+//         allow(true);
+//     }));
 
-domain
-    .live(['greetcast'])
-    .then(function (greetcast) {
-        greetcast.on('message', function (ctxt) {
-            console.log('broadcast: ', ctxt.body);
-        });
-    });
+// domain
+//     .live(['greetcast'])
+//     .then(function (greetcast) {
+//         greetcast.on('message', function (ctxt) {
+//             console.log('broadcast: ', ctxt.body);
+//         });
+//     });
 
-domain
-    .broadcast.emit(['greetcast'], ['greetcast'], 'HELLOOOO');
+// domain
+//     .send(['greetcast', 'broadcast'], [], 'HELLOOOO');
