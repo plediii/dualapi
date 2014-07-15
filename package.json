@@ -32,6 +32,8 @@
   },
   "dependencies": {
     "underscore": "^1.6.0",
-    "xml4node": "git://github.com/plediii/xml4node.git#master"
+    "xml4node": "git://github.com/plediii/xml4node.git#master",
+    "eventemitter2": "^0.4.14",
+    "bluebird": "^2.2.1"
   }
 }
