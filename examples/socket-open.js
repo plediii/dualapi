@@ -56,12 +56,10 @@ serverSocket.on('connect', function () {
 
     alice
         .live(['server', 'greetcast'])
-        .then(function (greetcast) {
-            greetcast.on('message', function (ctxt) {
-                console.log('broadcast: ', ctxt.body);
-            });
-            alice
-                .send(['server', 'greetcast', 'broadcast'], [], 'HELLOOOO');
+        .on('message', function (ctxt) {
+            console.log('broadcast: ', ctxt.body);
         });
+    alice
+        .send(['server', 'greetcast', 'broadcast'], [], 'HELLOOOO');
 
 });

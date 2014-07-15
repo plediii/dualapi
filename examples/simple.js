@@ -43,11 +43,9 @@ domain
 
 domain
     .live(['greetcast'])
-    .then(function (greetcast) {
-        greetcast.on('message', function (ctxt) {
-            console.log('broadcast: ', ctxt.body);
-        });
-        domain
-            .send(['greetcast', 'broadcast'], [], 'HELLOOOO');
+    .on('message', function (ctxt) {
+        console.log('BROADCAST: ', ctxt.body);
     });
+domain
+    .send(['greetcast', 'broadcast'], [], 'HELLOOOO');
 

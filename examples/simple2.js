@@ -57,11 +57,9 @@ server
 
 alice
     .live(['server', 'greetcast'])
-    .then(function (greetcast) {
-        greetcast.on('message', function (ctxt) {
-            console.log('broadcast: ', ctxt.body);
-        });
-        server
-            .send(['greetcast', 'broadcast'], [], 'HELLOOOO');
+    .on('message', function (ctxt) {
+        console.log('broadcast: ', ctxt.body);
     });
+server
+    .send(['greetcast', 'broadcast'], [], 'HELLOOOO');
 

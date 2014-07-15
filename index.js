@@ -118,21 +118,14 @@ _.extend(Domain.prototype, {
     , live: function (to) {
         var _this = this;
         var domain = _this;
-        return new Promise(function (resolve, reject) {
-            var from = [_this.nextid()];
-            var liveEmitter = new EventEmitter2();
-            var forwarder =  function (ctxt) {
-                liveEmitter.emit('message', new MessageContext(ctxt));
-            };
-            domain.on(from, forwarder);
-            if (!domain.send(to.concat('subscribe'), from)) {
-                domain.off(from, forwarder);
-                reject('No route to publisher: ', JSON.stringify(to));
-            }
-            else {
-                resolve(liveEmitter);
-            }
-        });
+        var from = [_this.nextid()];
+        var liveEmitter = new EventEmitter2();
+        var forwarder =  function (ctxt) {
+            liveEmitter.emit('message', new MessageContext(ctxt));
+        };
+        domain.on(from, forwarder);
+        domain.send(to.concat('subscribe'), from);
+        return liveEmitter;
     }
     , open: function (mount, socket, firewall) {
         var _this = this;
