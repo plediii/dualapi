@@ -32,34 +32,12 @@ server
 
 
 io.listen().on('connect', function (aliceSocket) {
-    server
-        .mount(['alice', '**'], function (ctxt) {
-            aliceSocket.emit('message', {
-                to: ctxt.to.slice(1)
-                , from: ctxt.from
-                , body: ctxt.body
-            });
-        });
-    aliceSocket.on('message', function (ctxt) {
-        server
-            .send(ctxt.to, ['alice'].concat(ctxt.from), ctxt.body);
-    });
+    server.open(['alice'], aliceSocket);
 });
 
 var alice = dual();
 var serverSocket = io.connect();
-alice
-    .mount(['server', '**'], function (ctxt) {
-        serverSocket.emit('message', {
-            to: ctxt.to.slice(1)
-            , from: ctxt.from
-            , body: ctxt.body
-        });
-    });
-
-serverSocket.on('message', function (ctxt) {
-    alice.send(ctxt.to, ['server'].concat(ctxt.from), ctxt.body);
-});
+alice.open(['server'], serverSocket);
 
 serverSocket.on('connect', function () {
 

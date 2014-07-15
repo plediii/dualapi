@@ -25,6 +25,14 @@ _.extend(MessageContext.prototype, {
         var _this = this;
         return _this.domain.send(to, _this.from, _this.body);
     }
+    , transfer: function (mount, socket) {
+        var _this = this;
+        socket.emit('message', {
+            to: _this.to.slice(mount.length)
+            , from: _this.from
+            , body: _this.body
+        })
+    }
 });
 
 var broadcaster = function (allower) {
@@ -74,6 +82,10 @@ _.extend(Domain.prototype, {
             });
         }
     }
+    , unmount: function (point) {
+        _this.removeAllListeners(point);
+        _this.removeAllListeners(point.concat('**'));
+    }
     , send: function (to, from, body) {
         var _this = this;
         if (!_this.emit(to, {
@@ -120,6 +132,26 @@ _.extend(Domain.prototype, {
             else {
                 resolve(liveEmitter);
             }
+        });
+    }
+    , open: function (mount, socket, firewall) {
+        var _this = this;
+        _this.mount(mount.concat('**'), function (ctxt) {
+            return ctxt.transfer(mount, socket);
+        });
+        var transferToDomain;
+        var openTransfer = function (ctxt) {
+            return _this.send(ctxt.to, mount.concat(ctxt.from), ctxt.body);
+        }
+        if (firewall) {
+            transferToDomain = firewall(openTransfer);
+        }
+        else {
+            transferToDomain = openTransfer;
+        }
+        socket.on('message', transferToDomain);
+        socket.on('disconnect', function () {
+            _this.unmount(mount);
         });
     }
 });
