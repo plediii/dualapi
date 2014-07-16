@@ -1,4 +1,5 @@
-
+/*jslint node: true */
+"use strict";
 
 var dual = require('../index');
 
@@ -27,7 +28,7 @@ domain
 domain
     .get(['greeting', 'english', 'hello'])
     .then(function (ctxt) {
-        console.log(ctxt.body)
+        console.log(ctxt.body);
     });
 
 domain
