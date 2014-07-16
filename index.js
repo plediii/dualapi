@@ -31,7 +31,7 @@ _.extend(MessageContext.prototype, {
             to: _this.to.slice(mount.length)
             , from: _this.from
             , body: _this.body
-        })
+        });
     }
 });
 
@@ -83,6 +83,7 @@ _.extend(Domain.prototype, {
         }
     }
     , unmount: function (point) {
+        var _this = this;
         _this.removeAllListeners(point);
         _this.removeAllListeners(point.concat('**'));
     }
@@ -135,7 +136,7 @@ _.extend(Domain.prototype, {
         var transferToDomain;
         var openTransfer = function (ctxt) {
             return _this.send(ctxt.to, mount.concat(ctxt.from), ctxt.body);
-        }
+        };
         if (firewall) {
             transferToDomain = firewall(openTransfer);
         }

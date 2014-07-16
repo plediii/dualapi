@@ -1,3 +1,5 @@
+/*jslint node: true */
+"use strict";
 
 var EventEmitter = require('events').EventEmitter;
 var _ = require('underscore');

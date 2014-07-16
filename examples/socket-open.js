@@ -1,4 +1,5 @@
-
+/*jslint node: true */
+"use strict";
 
 var dual = require('../index');
 var io = require('./mock-io');
