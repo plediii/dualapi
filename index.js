@@ -155,7 +155,8 @@ module.exports = function () {
 };
 
 _.extend(module.exports, {
-    broadcaster: broadcaster
+    MessageContext: MessageContext
+    , broadcaster: broadcaster
 });
 
 
