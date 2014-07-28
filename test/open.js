@@ -105,6 +105,25 @@ describe('dualapi', function () {
                     return pass(ctxt.to[1] === 'rouge');
                 }); 
             });
+
+            it('ctxt should be private to the firewall', function (done) {
+
+                dual.mount(['voiture7', '*'], function (ctxt) {
+                    assert.equal(ctxt.to[1], 'rouge')
+                    done();
+                });
+                dual.open(['rue20'], {
+                    on: function (target, cb) {
+                        if (target === 'dual') {
+                            cb({ to: ['voiture7', 'rouge']});
+                        }
+                    }
+                }, function (ctxt, pass) {
+                    ctxt.to[1] = 'blue';
+                    return pass(true);
+                }); 
+            });
+
         });
 
         describe('receive', function () {
