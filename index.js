@@ -27,7 +27,7 @@ _.extend(MessageContext.prototype, {
     }
     , transfer: function (mount, socket) {
         var _this = this;
-        socket.emit('message', {
+        socket.emit('dual', {
             to: _this.to.slice(mount.length)
             , from: _this.from
             , body: _this.body
@@ -122,7 +122,7 @@ _.extend(Domain.prototype, {
         var from = [_this.nextid()];
         var liveEmitter = new EventEmitter2();
         var forwarder =  function (ctxt) {
-            liveEmitter.emit('message', new MessageContext(ctxt));
+            liveEmitter.emit('dual', new MessageContext(ctxt));
         };
         domain.on(from, forwarder);
         domain.send(to.concat('subscribe'), from);
@@ -138,15 +138,25 @@ _.extend(Domain.prototype, {
             return _this.send(ctxt.to, mount.concat(ctxt.from), ctxt.body);
         };
         if (firewall) {
-            transferToDomain = firewall(openTransfer);
+            transferToDomain = function (ctxt) {
+                firewall(ctxt, function (ok) {
+                    if (ok) {
+                        openTransfer(ctxt);
+                    }
+                });
+            }
         }
         else {
             transferToDomain = openTransfer;
         }
-        socket.on('message', transferToDomain);
-        socket.on('disconnect', function () {
-            _this.unmount(mount);
-        });
+        socket.on('dual', transferToDomain);
+
+        var onDisconnect = function () {
+            _this.unmount(mount.concat('**'));
+            socket.off('dual', transferToDomain);
+            socket.off('disconnect', onDisconnect);
+        };
+        socket.on('disconnect', onDisconnect);
     }
 });
 
