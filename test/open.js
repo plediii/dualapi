@@ -109,7 +109,7 @@ describe('dualapi', function () {
             it('ctxt should be private to the firewall', function (done) {
 
                 dual.mount(['voiture7', '*'], function (ctxt) {
-                    assert.equal(ctxt.to[1], 'rouge')
+                    assert.equal(ctxt.to[1], 'rouge');
                     done();
                 });
                 dual.open(['rue20'], {

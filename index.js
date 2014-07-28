@@ -147,7 +147,7 @@ _.extend(Domain.prototype, {
                         openTransfer(ctxt);
                     }
                 });
-            }
+            };
         }
         else {
             transferToDomain = openTransfer;
