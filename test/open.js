@@ -107,6 +107,149 @@ describe('dualapi', function () {
             });
         });
 
+        describe('receive', function () {
+
+            it('dual should transfer messages targeted to the mount point on "dual" channel', function (done) {
+
+                dual.open(['wormhole'], {
+                    on: function (target, cb) {}
+                    , emit: function (target) {
+                        assert.equal(target, 'dual');
+                        done();
+                    }
+                });                
+                dual.send(['wormhole']);
+
+            });
+
+
+            it('dual should transfer messages targeted below the mount point on "dual" channel', function (done) {
+
+                dual.open(['wormhole1'], {
+                    on: function (target, cb) {}
+                    , emit: function (target) {
+                        assert.equal(target, 'dual');
+                        done();
+                    }
+                });                
+                dual.send(['wormhole1', 'delta']);
+            });
+
+            it('dual should transfer the json context, preserving from field', function (done) {
+
+                dual.open(['wormhole2'], {
+                    on: function (target, cb) {}
+                    , emit: function (target, msg) {
+                        assert.deepEqual(msg.from, ['bajor']);
+                        done();
+                    }
+                });                
+                dual.send(['wormhole2', 'delta'], ['bajor']);
+            });
+
+            it('dual should transfer the json context, preserving body field', function (done) {
+
+                dual.open(['wormhole3'], {
+                    on: function (target, cb) {}
+                    , emit: function (target, msg) {
+                        assert.deepEqual(msg.body, {captain: 'sisko'});
+                        done();
+                    }
+                });                
+                dual.send(['wormhole3', 'delta'], ['bajor'], { captain: 'sisko'});
+            });
+
+            it('dual should transfer the json context, translating the to field', function (done) {
+
+                dual.open(['wormhole4'], {
+                    on: function (target, cb) {}
+                    , emit: function (target, msg) {
+                        assert.deepEqual(msg.to, ['delta']);
+                        done();
+                    }
+                });                
+                dual.send(['wormhole4', 'delta'], { captain: 'sisko'});
+            });
+            
+        });
+
+        describe('disconnect', function () {
+
+            it('dual should stop sending messages to the mounted host after disconnect', function () {
+                var mockSocket = {};
+                var called = 0;
+                dual.mount(['sector'], function () {
+                    called++;
+                });
+                dual.open(['deepspace'], {
+                    on: function (target, cb) {
+                        mockSocket[target] = cb;
+                    }
+                    , off: function () {}
+                    , emit: function () {
+                        called++;
+                    }
+                }); 
+                dual.send(['deepspace']);
+                mockSocket.disconnect();
+                dual.send(['deepspace']);
+                assert.equal(called, 1);
+            });
+
+            it('dual should stop sending messages below the mounted host after disconnect', function () {
+                var mockSocket = {};
+                var called = 0;
+                dual.mount(['sector2'], function () {
+                    called++;
+                });
+                dual.open(['deepspace2'], {
+                    on: function (target, cb) {
+                        mockSocket[target] = cb;
+                    }
+                    , off: function () {}
+                    , emit: function () {
+                        called++;
+                    }
+                }); 
+                dual.send(['deepspace2', '1']);
+                mockSocket.disconnect();
+                dual.send(['deepspace2', '2']);
+                assert.equal(called, 1);
+            });
+
+
+            it('dual should stop listening for dual messages on disconnect', function (done) {
+                var mockSocket = {};
+                dual.open(['deepspace3'], {
+                    on: function (target, cb) {
+                        mockSocket[target] = cb;
+                    }
+                    , off: function (target, cb) {
+                        if (target == 'dual') {
+                            done();
+                        }
+                    }
+                }); 
+                mockSocket.disconnect();
+            });
+
+            it('dual should stop listening for disconnect messages on disconnect', function (done) {
+                var mockSocket = {};
+                dual.open(['deepspace3'], {
+                    on: function (target, cb) {
+                        mockSocket[target] = cb;
+                    }
+                    , off: function (target, cb) {
+                        if (target == 'disconnect') {
+                            done();
+                        }
+                    }
+                }); 
+                mockSocket.disconnect();
+            });
+
+        });
+
     });
 
 });
