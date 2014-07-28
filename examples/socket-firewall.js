@@ -61,7 +61,7 @@ serverSocket.on('connect', function () {
     alice
         .get(['server', 'greeting', 'english', 'hello'])
         .then(function (ctxt) {
-            console.log(ctxt.body)
+            console.log(ctxt.body);
         });
 
     alice
