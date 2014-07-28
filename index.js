@@ -139,7 +139,10 @@ _.extend(Domain.prototype, {
         };
         if (firewall) {
             transferToDomain = function (ctxt) {
-                firewall(ctxt, function (ok) {
+                firewall({
+                    to: _.clone(ctxt.to)
+                    , from: _.clone(ctxt.from)
+                }, function (ok) {
                     if (ok) {
                         openTransfer(ctxt);
                     }
