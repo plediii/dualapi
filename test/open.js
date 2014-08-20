@@ -89,20 +89,25 @@ describe('dualapi', function () {
             
             it('should be able to filter messages', function (done) {
                 var called = 0;
+                dual.mount(['voiture6', 'rouge'], function () {
+                    assert(false);
+                });
                 dual.mount(['voiture6', '*'], function () {
                     called++;
+                    if (called > 1) {
+                        done();
+                    }
                 });
                 dual.open(['rue3'], {
                     on: function (target, cb) {
                         if (target === 'dual') {
                             cb({ to: ['voiture6', 'red']});
                             cb({ to: ['voiture6', 'rouge']});
-                            assert.equal(called, 1);
-                            done();
+                            cb({ to: ['voiture6', 'blue']});
                         }
                     }
                 }, function (ctxt, pass) {
-                    return pass(ctxt.to[1] === 'rouge');
+                    return pass(ctxt.to[1] !== 'rouge');
                 }); 
             });
 
@@ -194,7 +199,7 @@ describe('dualapi', function () {
 
         describe('disconnect', function () {
 
-            it('dual should stop sending messages to the mounted host after disconnect', function () {
+            it('dual should stop sending messages to the mounted host after disconnect', function (done) {
                 var mockSocket = {};
                 var called = 0;
                 dual.mount(['sector'], function () {
@@ -207,15 +212,16 @@ describe('dualapi', function () {
                     , off: function () {}
                     , emit: function () {
                         called++;
+                        assert.equal(called, 1);
+                        mockSocket.disconnect();
+                        dual.send(['deepspace']);
+                        done();
                     }
                 }); 
                 dual.send(['deepspace']);
-                mockSocket.disconnect();
-                dual.send(['deepspace']);
-                assert.equal(called, 1);
             });
 
-            it('dual should stop sending messages below the mounted host after disconnect', function () {
+            it('dual should stop sending messages below the mounted host after disconnect', function (done) {
                 var mockSocket = {};
                 var called = 0;
                 dual.mount(['sector2'], function () {
@@ -228,12 +234,13 @@ describe('dualapi', function () {
                     , off: function () {}
                     , emit: function () {
                         called++;
+                        assert.equal(called, 1);
+                        mockSocket.disconnect();
+                        dual.send(['deepspace2', '2']);
+                        done();
                     }
                 }); 
                 dual.send(['deepspace2', '1']);
-                mockSocket.disconnect();
-                dual.send(['deepspace2', '2']);
-                assert.equal(called, 1);
             });
 
 
