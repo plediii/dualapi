@@ -2,7 +2,7 @@
 "use strict";
 
 var _ = require('underscore');
-var EventEmitter2 = require('eventemitter2').EventEmitter2;
+var HevEmitter = require('HevEmitter').EventEmitter;
 var inherits = require('util').inherits;
 var Promise = require('bluebird');
 
@@ -58,11 +58,11 @@ var broadcaster = function (allower) {
 var Domain = function () {
     var _this = this;
     _this.hosts = {};
-    EventEmitter2.call(_this, { wildcard: true, verbose: true });
+    HevEmitter.call(_this);
     _this.uid = 0;
 };
 
-inherits(Domain, EventEmitter2);
+inherits(Domain, HevEmitter);
 
 _.extend(Domain.prototype, {
     wrapHost: function (host) {
@@ -120,7 +120,7 @@ _.extend(Domain.prototype, {
         var _this = this;
         var domain = _this;
         var from = [_this.nextid()];
-        var liveEmitter = new EventEmitter2();
+        var liveEmitter = new HevEmitter();
         var forwarder =  function (ctxt) {
             liveEmitter.emit('dual', new MessageContext(ctxt));
         };
