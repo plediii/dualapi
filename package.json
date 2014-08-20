@@ -32,7 +32,8 @@
   },
   "dependencies": {
     "underscore": "^1.6.0",
-    "eventemitter2": "git://github.com/plediii/EventEmitter2.git#master",
-    "bluebird": "^2.2.1"
+    "eventemitter2": "^0.4.14",
+    "bluebird": "^2.2.1",
+    "hevemitter": "git://github.com/plediii/HevEmitter.git#master"
   }
 }
