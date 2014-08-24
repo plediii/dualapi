@@ -11,9 +11,10 @@ describe('dualapi', function () {
 
         var dual = dualapi();
         
-        it('should be host mount points', function () {
+        it('should be host mount points', function (done) {
             dual.mount(['cupcake', ':sprinkles'], function (ctxt) {
                 assert.equal(ctxt.params.sprinkles, 'chocolate');
+                done();
             });
 
             dual.send(['cupcake', 'chocolate']);
