@@ -65,20 +65,14 @@ var Domain = function () {
 inherits(Domain, HevEmitter);
 
 _.extend(Domain.prototype, {
-    wrapHost: function (host) {
-        var _this = this;
-        return function (ctxt) {
-            return host(new MessageContext(_.extend({}, { domain: _this }, ctxt)));
-        };
-    }
-    , mount: function (point, host) {
+    mount: function (point, host) {
         var _this = this;
         if (_.isFunction(host)) {
-            _this.on(point, _this.wrapHost(host));
+            _this.on(point, host);
         }
         else if (_.isObject(host)) {
             _.each(host, function (f, n) {
-                _this.on(point.concat(n), _this.wrapHost(f));
+                _this.on(point.concat(n), f);
             });
         }
     }
@@ -89,15 +83,17 @@ _.extend(Domain.prototype, {
     }
     , send: function (to, from, body) {
         var _this = this;
-        if (!_this.emit(to, {
+        return _this.emit(to, new MessageContext(_.extend({}, { domain: _this }, {
             to: to
             , from: from
             , body: body
-        })) {
-            console.error('Dropped message: ', JSON.stringify(to));
-            return false;
-        }
-        return true;
+        })))
+            .then(function (called) {
+                if (!called) {
+                    console.error('Dropped message: ', JSON.stringify(to));
+                }
+                return called
+            });
     }
     , nextid: function () {
         return '' + ((this.uid)++);
