@@ -23,19 +23,29 @@ describe('dualapi', function () {
 
         it('a sequence of hosts at the same mount point can be blocked by neglecting next', function (done) {
             var count = 0;
+            var blocked = true;
             dual.mount(['assembly2', 'point1'], function (ctxt, next) {
-                received1++;
-                if (received1 > 1) {
+                count++;
+                if (count > 1) {
                     done();
                 }
+                return next('failure');
             });
 
             dual.mount(['assembly2', 'point1'], function (ctxt, next) {
-                assert(false);
+                blocked = false;
             });
 
-            dual.send(['assembly2', 'point1']);
-            dual.send(['assembly2', 'point1']);
+            dual.send(['assembly2', 'point1']).catch(function (err) {
+                assert.equal(err.message, 'failure');
+                assert(blocked);
+
+                dual.send(['assembly2', 'point1']).catch(function (err) {
+                    assert.equal(err.message, 'failure');
+                    assert(blocked);
+                });
+
+            });
         });
 
         it('a sequence of hosts at the same mount point receive the same ctxt', function (done) {
