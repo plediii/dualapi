@@ -11,41 +11,34 @@ describe('dualapi', function () {
 
         var dual = dualapi();
         
-        it('a sequence of hosts at the same mount point are chained with next', function () {
-            var received1 = 0;
-            var received2 = 0;
-
+        it('a sequence of hosts at the same mount point are chained with next', function (done) {
             dual.mount(['assembly', 'point1'], function (ctxt, next) {
-                received1++;
                 next();
             });
-
             dual.mount(['assembly', 'point1'], function (ctxt, next) {
-                received2++;
+                done();
             });
-
             dual.send(['assembly', 'point1']);
-            assert.equal(received1, 1);
-            assert.equal(received2, 1);
         });
 
-        it('a sequence of hosts at the same mount point can be blocked by neglecting next', function () {
-            var received1 = 0;
-            var received2 = 0;
+        it('a sequence of hosts at the same mount point can be blocked by neglecting next', function (done) {
+            var count = 0;
             dual.mount(['assembly2', 'point1'], function (ctxt, next) {
                 received1++;
+                if (received1 > 1) {
+                    done();
+                }
             });
 
             dual.mount(['assembly2', 'point1'], function (ctxt, next) {
-                received2++;
+                assert(false);
             });
 
             dual.send(['assembly2', 'point1']);
-            assert.equal(received1, 1);
-            assert.equal(received2, 0);
+            dual.send(['assembly2', 'point1']);
         });
 
-        it('a sequence of hosts at the same mount point receive the same ctxt', function () {
+        it('a sequence of hosts at the same mount point receive the same ctxt', function (done) {
             dual.mount(['assembly3', 'point1'], function (ctxt, next) {
                 ctxt.robotarm = true;
                 next();
@@ -53,28 +46,26 @@ describe('dualapi', function () {
 
             dual.mount(['assembly3', 'point1'], function (ctxt, next) {
                 assert(ctxt.robotarm);
+                done();
             });
 
             dual.send(['assembly3', 'point1']);
         });
 
 
-        it('a sequence of hosts at hierarchically are chained by hierarchical depth', function () {
-            var received1 = 0;
-            var received2 = 0;
-
+        it('hosts closer to the root on a hierarchy are called before descendants', function (done) {
+            var called = 0;
             dual.mount(['assembly4', 'robot', 'arm'], function (ctxt, next) {
-                received1++;
+                assert.equal(1, called);
+                done();
             });
 
             dual.mount(['assembly4', '**'], function (ctxt, next) {
-                received2++;
+                called++;
                 next();
             });
 
             dual.send(['assembly4', 'robot', 'arm']);
-            assert.equal(received1, 1);
-            assert.equal(received2, 1);
         });
 
     });
