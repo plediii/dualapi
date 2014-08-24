@@ -55,6 +55,45 @@ var broadcaster = function (allower) {
     };
 };
 
+var mountParametrized = function (domain, point, host) {
+    var params = [];
+    point = _.map(point, function (name, index) {
+        if (name[0] === ':') {
+            params.push([name.slice(1), index]);
+            return '*'
+        }
+        else {
+            return name;
+        }
+    });
+    var f;
+    if (params.length === 0) {
+        f = host;
+    }
+    else {
+        var parseParams = function (msg) {
+            msg.params = {};
+            _.each(params, function (param) {
+                msg.params[param[0]] = msg.to[param[1]];
+            });
+        };
+
+        if (host.length === 2) {
+            f = function (msg, next) {
+                parseParams(msg);
+                return host(msg, next);
+            }
+        }
+        else {
+            f = function (msg) {
+                parseParams(msg);
+                return host(msg);
+            }
+        }
+    }
+    domain.on(point, f);
+};
+
 var Domain = function () {
     var _this = this;
     _this.hosts = {};
@@ -68,11 +107,11 @@ _.extend(Domain.prototype, {
     mount: function (point, host) {
         var _this = this;
         if (_.isFunction(host)) {
-            _this.on(point, host);
+            mountParametrized(_this, point, host);
         }
         else if (_.isObject(host)) {
             _.each(host, function (f, n) {
-                _this.on(point.concat(n), f);
+                mountParametrized(_this, point.concat(n), f);
             });
         }
     }
