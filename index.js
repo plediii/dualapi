@@ -191,8 +191,8 @@ _.extend(Domain.prototype, {
 
         var onDisconnect = function () {
             _this.unmount(mount.concat('**'));
-            socket.off('dual', transferToDomain);
-            socket.off('disconnect', onDisconnect);
+            socket.removeListener('dual', transferToDomain);
+            socket.removeListener('disconnect', onDisconnect);
         };
         socket.on('disconnect', onDisconnect);
     }
