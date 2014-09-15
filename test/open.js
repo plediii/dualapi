@@ -209,7 +209,7 @@ describe('dualapi', function () {
                     on: function (target, cb) {
                         mockSocket[target] = cb;
                     }
-                    , off: function () {}
+                    , removeListener: function () {}
                     , emit: function () {
                         called++;
                         assert.equal(called, 1);
@@ -231,7 +231,7 @@ describe('dualapi', function () {
                     on: function (target, cb) {
                         mockSocket[target] = cb;
                     }
-                    , off: function () {}
+                    , removeListener: function () {}
                     , emit: function () {
                         called++;
                         assert.equal(called, 1);
@@ -250,7 +250,7 @@ describe('dualapi', function () {
                     on: function (target, cb) {
                         mockSocket[target] = cb;
                     }
-                    , off: function (target, cb) {
+                    , removeListener: function (target, cb) {
                         if (target == 'dual') {
                             done();
                         }
@@ -265,7 +265,7 @@ describe('dualapi', function () {
                     on: function (target, cb) {
                         mockSocket[target] = cb;
                     }
-                    , off: function (target, cb) {
+                    , removeListener: function (target, cb) {
                         if (target == 'disconnect') {
                             done();
                         }
