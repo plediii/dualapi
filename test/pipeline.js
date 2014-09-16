@@ -80,4 +80,24 @@ describe('dualapi', function () {
 
     });
 
+    describe('.forward', function () {
+
+        it('should preserve additional attributes on the context ', function (done) {
+            var ctxt = new dualapi.MessageContext({
+                domain: {
+                    send: function (to, from, body, options) {
+                        assert.equal(options.contest, 'winner');
+                        done();
+                    }
+                }
+                , to: ['costume', 'party']
+                , from: ['century', 'turn']
+                , contest: 'winner'
+            });
+            ctxt.forward(['doctor']);
+        });
+
+    });
+
+
 });
