@@ -78,26 +78,25 @@ describe('dualapi', function () {
             dual.send(['assembly4', 'robot', 'arm']);
         });
 
-    });
+        describe('.forward', function () {
 
-    describe('.forward', function () {
-
-        it('should preserve additional attributes on the context ', function (done) {
-            var ctxt = new dualapi.MessageContext({
-                domain: {
-                    send: function (to, from, body, options) {
-                        assert.equal(options.contest, 'winner');
-                        done();
-                    }
-                }
-                , to: ['costume', 'party']
-                , from: ['century', 'turn']
-                , contest: 'winner'
+            it('should preserve additional attributes on the context ', function (done) {
+                dual.mount(['costume', 'party'], function (ctxt) {
+                    ctxt.forward(['doctor'], { contest: 'winner' });
+                });
+                dual.mount(['doctor'], function (ctxt) {
+                    assert.deepEqual(ctxt.from, ['century', 'turn']);
+                    assert.equal(ctxt.contest, 'winner');
+                    done();
+                });
+                dual.send(['costume', 'party'], ['century', 'turn']);
             });
-            ctxt.forward(['doctor']);
+
         });
 
+
     });
+
 
 
 });
