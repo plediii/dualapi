@@ -111,7 +111,7 @@ describe('dualapi', function () {
                 }); 
             });
 
-            it('ctxt should be private to the firewall', function (done) {
+            it('ctxt addresses should be private to the firewall', function (done) {
 
                 dual.mount(['voiture7', '*'], function (ctxt) {
                     assert.equal(ctxt.to[1], 'rouge');
@@ -126,6 +126,23 @@ describe('dualapi', function () {
                 }, function (ctxt, pass) {
                     ctxt.to[1] = 'blue';
                     return pass(true);
+                }); 
+            });
+
+            it('should be able to attach parameters', function (done) {
+
+                dual.mount(['voiture20', '*'], function (ctxt) {
+                    assert.equal(ctxt.cat, 'bulldog');
+                    done();
+                });
+                dual.open(['rue20'], {
+                    on: function (target, cb) {
+                        if (target === 'dual') {
+                            cb({ to: ['voiture20', 'rouge']});
+                        }
+                    }
+                }, function (ctxt, pass) {
+                    return pass(true, {cat: 'bulldog'});
                 }); 
             });
 
