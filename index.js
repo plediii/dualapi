@@ -9,6 +9,7 @@ var Promise = require('bluebird');
 var MessageContext = function (options) {
     var _this = this;
     _.extend(_this, options);
+    _this.options = options;
 };
 
 _.extend(MessageContext.prototype, {
@@ -18,7 +19,7 @@ _.extend(MessageContext.prototype, {
     }
     , forward: function (to) {
         var _this = this;
-        return _this.domain.send(to, _this.from, _this.body);
+        return _this.domain.send(to, _this.from, _this.body, _this.options);
     }
     , transfer: function (mount, socket) {
         var _this = this;
