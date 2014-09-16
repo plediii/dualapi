@@ -17,9 +17,9 @@ _.extend(MessageContext.prototype, {
         var _this = this;
         return _this.domain.send(_this.from, _this.to, body);
     }
-    , forward: function (to) {
+    , forward: function (to, options) {
         var _this = this;
-        return _this.domain.send(to, _this.from, _this.body, _this.options);
+        return _this.domain.send(to, _this.from, _this.body, _.extend({}, _this.options, options));
     }
     , transfer: function (mount, socket) {
         var _this = this;
@@ -118,7 +118,7 @@ _.extend(Domain.prototype, {
     }
     , send: function (to, from, body, options) {
         var _this = this;
-        return _this.emit(to, new MessageContext(_.extend({
+        return _this.emit(to, new MessageContext(_.defaults({
             domain: _this
             , to: to
             , from: from
