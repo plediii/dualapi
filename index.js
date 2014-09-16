@@ -137,7 +137,7 @@ _.extend(Domain.prototype, {
     , nextid: function () {
         return '' + ((this.uid)++);
     }
-    , get: function (to) {
+    , get: function (to, body) {
         var _this = this;
         var domain = _this;
         return new Promise(function (resolve, reject) {
@@ -147,8 +147,9 @@ _.extend(Domain.prototype, {
                     return reject(ctxt.error);
                 }
                 resolve(new MessageContext(ctxt));
-            });
-            return domain.send(to, from);
+            })
+            return domain.send(to, from, body)
+                .catch(reject);
         });
     }
     , live: function (to) {
