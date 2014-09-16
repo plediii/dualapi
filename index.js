@@ -8,12 +8,7 @@ var Promise = require('bluebird');
 
 var MessageContext = function (options) {
     var _this = this;
-    _.extend(_this, _.pick(options, [
-        'domain'
-        , 'to'
-        , 'from'
-        , 'body'
-    ]));
+    _.extend(_this, options);
 };
 
 _.extend(MessageContext.prototype, {
@@ -120,13 +115,14 @@ _.extend(Domain.prototype, {
         _this.removeAllListeners(point);
         _this.removeAllListeners(point.concat('**'));
     }
-    , send: function (to, from, body) {
+    , send: function (to, from, body, options) {
         var _this = this;
-        return _this.emit(to, new MessageContext(_.extend({}, { domain: _this }, {
-            to: to
+        return _this.emit(to, new MessageContext(_.extend({
+            domain: _this
+            , to: to
             , from: from
             , body: body
-        })))
+        }, options)))
             .then(function (called) {
                 if (!called) {
                     console.error('Dropped message: ', JSON.stringify(to));
@@ -170,17 +166,19 @@ _.extend(Domain.prototype, {
             return ctxt.transfer(mount, socket);
         });
         var transferToDomain;
-        var openTransfer = function (ctxt) {
-            return _this.send(ctxt.to, mount.concat(ctxt.from), ctxt.body);
+        var openTransfer = function (ctxt, options) {
+            return _this.send(ctxt.to, mount.concat(ctxt.from), ctxt.body, options);
         };
         if (firewall) {
             transferToDomain = function (ctxt) {
-                firewall({
-                    to: _.clone(ctxt.to)
-                    , from: _.clone(ctxt.from)
-                }, function (ok) {
+                var to = _.clone(ctxt.to);
+                var from = _.clone(ctxt.from);
+                firewall(ctxt, function (ok, options) {
                     if (ok) {
-                        openTransfer(ctxt);
+                        openTransfer(_.extend(ctxt, {
+                            to: to
+                            , from: from
+                        }), options);
                     }
                 });
             };
