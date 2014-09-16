@@ -24,6 +24,17 @@ describe('dualapi', function () {
 
         });
 
+        it('should send the message as ctxt.body', function (done) {
+            dual.mount(['musician'], function (ctxt) {
+                assert.equal(ctxt.body, 'ten years');
+                done();
+            });
+
+            dual.get(['musician'], 'ten years').catch(function (err) {
+                done(err);
+            });
+        });
+
     });
 
 });
