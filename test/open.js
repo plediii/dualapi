@@ -7,7 +7,10 @@ var assert = require('assert');
 
 describe('dualapi', function () {
 
-    
+
+    // firewall should overrwrite incoming options
+    // firewall should erase all options by default?
+    // trasnfer should include options, and allow additional
     describe('open', function () {
 
         var dual = dualapi();
