@@ -86,7 +86,7 @@ describe('dualapi', function () {
                 });
                 dual.mount(['doctor'], function (ctxt) {
                     assert.deepEqual(ctxt.from, ['century', 'turn']);
-                    assert.equal(ctxt.contest, 'winner');
+                    assert.equal(ctxt.options.contest, 'winner');
                     done();
                 });
                 dual.send(['costume', 'party'], ['century', 'turn']);

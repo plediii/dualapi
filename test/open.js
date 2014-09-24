@@ -129,10 +129,10 @@ describe('dualapi', function () {
                 }); 
             });
 
-            it('should be able to attach parameters', function (done) {
+            it('should be able to attach options', function (done) {
 
                 dual.mount(['voiture20', '*'], function (ctxt) {
-                    assert.equal(ctxt.cat, 'bulldog');
+                    assert.equal(ctxt.options.cat, 'bulldog');
                     done();
                 });
                 dual.open(['rue20'], {
