@@ -12,20 +12,21 @@ var MessageContext = function (options) {
 };
 
 _.extend(MessageContext.prototype, {
-    reply: function (body) {
+    reply: function (body, options) {
         var _this = this;
-        return _this.domain.send(_this.from, _this.to, body);
+        return _this.domain.send(_this.from, _this.to, body, options);
     }
     , forward: function (to, options) {
         var _this = this;
         return _this.domain.send(to, _this.from, _this.body, _.extend({}, _this.options, options));
     }
-    , transfer: function (mount, socket) {
+    , transfer: function (mount, socket, options) {
         var _this = this;
         socket.emit('dual', {
             to: _this.to.slice(mount.length)
             , from: _this.from
             , body: _this.body
+            , options: _.extend({}, _this.options, options)
         });
     }
 });
@@ -179,7 +180,7 @@ _.extend(Domain.prototype, {
                         openTransfer(_.extend(ctxt, {
                             to: to
                             , from: from
-                            , options: options
+                            , options: options || {}
                         }));
                     }
                 });
