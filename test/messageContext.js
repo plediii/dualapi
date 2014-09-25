@@ -4,6 +4,7 @@
 var dualapi = require('../index');
 var _ = require('underscore');
 var assert = require('assert');
+var EventEmitter = require('events').EventEmitter;
 
 describe('dualapi', function () {
 
@@ -43,7 +44,9 @@ describe('dualapi', function () {
                 var ctxt = new dualapi.MessageContext({
                     domain: {
                         send: function (to, from, body, options) {
-                            assert(!options);
+                            if (options) {
+                                assert.deepEqual(options, {});
+                            }
                             done();
                         }
                     }
@@ -163,6 +166,70 @@ describe('dualapi', function () {
                     , options: {deep: 'space'}
                 });
                 ctxt.forward(['monkey'], {deep: 'different'});
+            });
+
+        });
+
+        describe('.transfer', function () {
+
+            it('should emit on socket with expected parameters', function (done) {
+                var ctxt = new dualapi.MessageContext({
+                    domain: {}
+                    , to: ['big', 'on', 'ready']
+                    , from: ['part', 'missed']
+                    , body: { oh: 'gauntlet'}
+                    , options: { torches: 'cool' }
+                });
+                var socket = new EventEmitter();
+                socket.on('dual', function (msg) {
+                    assert.deepEqual(msg.to, ['on', 'ready']);
+                    assert.deepEqual(msg.from, ['part', 'missed']);
+                    assert.deepEqual(msg.body, { oh: 'gauntlet'});
+                    assert.deepEqual(msg.options, { torches: 'cool' });
+                    done();
+                });
+                ctxt.transfer(['big'], socket);
+            });
+
+            it('should emit on socket with additional options', function (done) {
+                var ctxt = new dualapi.MessageContext({
+                    domain: {}
+                    , to: ['big', 'on', 'ready']
+                    , from: ['part', 'missed']
+                    , body: { oh: 'gauntlet'}
+                    , options: { torches: 'cool' }
+                });
+                var socket = new EventEmitter();
+                socket.on('dual', function (msg) {
+                    assert.deepEqual(msg.options,{ 
+                            torches: 'cool' 
+                            , your: 'way'
+                    });
+                    done();
+                });
+                ctxt.transfer(['big'], socket, {
+                    your: 'way'
+                });
+            });
+
+            it('should emit on socket with overriden options', function (done) {
+                var ctxt = new dualapi.MessageContext({
+                    domain: {}
+                    , to: ['big', 'on', 'ready']
+                    , from: ['part', 'missed']
+                    , body: { oh: 'gauntlet'}
+                    , options: { torches: 'cool' }
+                });
+                var socket = new EventEmitter();
+                socket.on('dual', function (msg) {
+                    assert.deepEqual(msg.options,{ 
+                            torches: 'bad' 
+                    });
+                    done();
+                });
+                ctxt.transfer(['big'], socket, {
+                    torches: 'bad'
+                });
             });
 
         });
