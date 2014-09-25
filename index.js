@@ -8,25 +8,25 @@ var Promise = require('bluebird');
 
 var MessageContext = function (options) {
     var _this = this;
-    _.extend(_this, options);
-    _this.options = options;
+    _.extend(_this, _.pick(options, 'domain', 'to', 'from', 'body', 'options'));
 };
 
 _.extend(MessageContext.prototype, {
-    reply: function (body) {
+    reply: function (body, options) {
         var _this = this;
-        return _this.domain.send(_this.from, _this.to, body);
+        return _this.domain.send(_this.from, _this.to, body, options);
     }
     , forward: function (to, options) {
         var _this = this;
         return _this.domain.send(to, _this.from, _this.body, _.extend({}, _this.options, options));
     }
-    , transfer: function (mount, socket) {
+    , transfer: function (mount, socket, options) {
         var _this = this;
         socket.emit('dual', {
             to: _this.to.slice(mount.length)
             , from: _this.from
             , body: _this.body
+            , options: _.extend({}, _this.options, options)
         });
     }
 });
@@ -123,7 +123,8 @@ _.extend(Domain.prototype, {
             , to: to
             , from: from
             , body: body
-        }, options)))
+            , options: options
+        })))
             .then(function (called) {
                 if (!called) {
                     console.error('Dropped message: ', JSON.stringify(to));
@@ -167,8 +168,8 @@ _.extend(Domain.prototype, {
             return ctxt.transfer(mount, socket);
         });
         var transferToDomain;
-        var openTransfer = function (ctxt, options) {
-            return _this.send(ctxt.to, mount.concat(ctxt.from), ctxt.body, options);
+        var openTransfer = function (ctxt) {
+            return _this.send(ctxt.to, mount.concat(ctxt.from), ctxt.body, ctxt.options);
         };
         if (firewall) {
             transferToDomain = function (ctxt) {
@@ -179,7 +180,8 @@ _.extend(Domain.prototype, {
                         openTransfer(_.extend(ctxt, {
                             to: to
                             , from: from
-                        }), options);
+                            , options: options || {}
+                        }));
                     }
                 });
             };

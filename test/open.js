@@ -7,7 +7,6 @@ var assert = require('assert');
 
 describe('dualapi', function () {
 
-    
     describe('open', function () {
 
         var dual = dualapi();
@@ -129,10 +128,28 @@ describe('dualapi', function () {
                 }); 
             });
 
-            it('should be able to attach parameters', function (done) {
+            it('should filter options', function (done) {
+
+                dual.mount(['share', '*'], function (ctxt) {
+                    assert.deepEqual(ctxt.options, {});
+                    done();
+                });
+                dual.open(['wanda'], {
+                    on: function (target, cb) {
+                        if (target === 'dual') {
+                            cb({ to: ['share', 'quick']
+                               , options: {person: 'andrew'}});
+                        }
+                    }
+                }, function (ctxt, pass) {
+                    return pass(true);
+                }); 
+            });
+
+            it('should be able to attach options', function (done) {
 
                 dual.mount(['voiture20', '*'], function (ctxt) {
-                    assert.equal(ctxt.cat, 'bulldog');
+                    assert.deepEqual(ctxt.options, {cat: 'bulldog'});
                     done();
                 });
                 dual.open(['rue20'], {
