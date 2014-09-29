@@ -71,4 +71,74 @@ describe('dualapi', function () {
 
     });
 
+    describe('mounted tree', function () {
+
+        var dual = dualapi();
+
+        it('should be possible to mount hosts in a tree structure', function (done) {
+            dual.mount([], {
+                host: function () {
+                    done();
+                }
+            });
+
+            dual.send(['host']);
+        });
+
+        it('should be possible to mount hosts in a tree structure below a static trunk', function (done) {
+            dual.mount(['cookie'], {
+                sword: function () {
+                    done();
+                }
+            });
+
+            dual.send(['cookie', 'sword']);
+        });
+
+        it('should be possible to mount deep tree structure', function (done) {
+            dual.mount([], {
+                treat: {
+                    grass: function () {
+                        done();
+                    }
+                }
+            });
+
+            dual.send(['treat', 'grass']);
+        });
+
+        it('should be possible to mount deep tree structure under a static root', function (done) {
+            dual.mount(['phew'], {
+                come: {
+                    around: function () {
+                        done();
+                    }
+                }
+            });
+
+            dual.send(['phew', 'come', 'around']);
+        });
+
+        it('should be possible to mount multiple deep tree structure', function (done) {
+            var called = [];
+            dual.mount([], {
+                huh: {
+                    pizza: function () {
+                        called.push('pizza');
+                    }
+                }
+                , no: {
+                    more: function () {
+                        assert.deepEqual(called, ['pizza']);
+                        done();
+                    }
+                }
+            });
+
+            dual.send(['huh', 'pizza']);
+            dual.send(['no', 'more']);
+        });
+
+    });
+
 });

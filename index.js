@@ -107,7 +107,12 @@ _.extend(Domain.prototype, {
         }
         else if (_.isObject(host)) {
             _.each(host, function (f, n) {
-                mountParametrized(_this, point.concat(n), f);
+                if (_.isObject(f)) {
+                    _this.mount(point.concat(n), f)
+                }
+                else {
+                    mountParametrized(_this, point.concat(n), f);
+                }
             });
         }
     }
