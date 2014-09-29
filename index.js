@@ -203,6 +203,17 @@ _.extend(Domain.prototype, {
         };
         socket.on('disconnect', onDisconnect);
     }
+    , bridge: function (remote, routes, fromRoutes) {
+        var _this = this;
+        _.each(routes, function (route) {
+            _this.mount(route, function (ctxt) {
+                remote.send(ctxt.to, ctxt.from, ctxt.body, ctxt.options);
+            });
+        });
+        if (fromRoutes) {
+            remote.bridge(_this, fromRoutes);
+        }
+    }
 });
 
 module.exports = function () {
