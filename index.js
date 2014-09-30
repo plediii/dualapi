@@ -206,7 +206,7 @@ _.extend(Domain.prototype, {
     , bridge: function (remote, routes, fromRoutes) {
         var _this = this;
         _.each(routes, function (route) {
-            _this.mount(route, function (ctxt) {
+            _this.mount(route.concat('**'), function (ctxt) {
                 remote.send(ctxt.to, ctxt.from, ctxt.body, ctxt.options);
             });
         });
