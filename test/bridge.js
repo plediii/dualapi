@@ -22,6 +22,18 @@ describe('dualapi', function () {
             d.send(['yours'], [], {}, {});
         });
 
+        it('should transfer deep events from bridged host to target host', function (done) {
+
+            var d = dualapi();
+            var e = dualapi();
+
+            e.mount(['yours', 'oasis'], function () {
+                done();
+            });
+            d.bridge(e, [['yours']]);
+            d.send(['yours', 'oasis'], [], {}, {});
+        });
+
         it('should transfer events with identical from host', function (done) {
 
             var d = dualapi();
