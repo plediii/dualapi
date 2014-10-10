@@ -7,6 +7,28 @@ var assert = require('assert');
 
 describe('dualapi', function () {
 
+    describe('mount', function () {
+
+        it('should return the api', function (done) {
+            var dual = dualapi();
+            var called = [];
+            dual
+                .mount(['big'], function () {
+                    called.push('bad')
+                })
+                .mount(['wolf'], function () {
+                    called.push('laser')
+                });
+
+            dual.send(['big']);
+            dual.send(['wolf'])
+            .then(function () {
+                assert.deepEqual(['bad', 'laser'], called);
+                done();
+            });
+
+        });
+    });
     
     describe('mounted host', function () {
 
