@@ -85,7 +85,7 @@ describe('dualapi', function () {
             dual.send(['hostB'], ['sourceA']);
         });
 
-        it('should be triggered with undefined body when on body is provided', function (done) {
+        it('should be triggered with undefined body when no body is provided', function (done) {
             dual.mount(['hostC'], function (ctxt) {
                 assert(_.isUndefined(ctxt.body));
                 done();

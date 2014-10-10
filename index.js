@@ -12,7 +12,6 @@ var MessageContext = function (options) {
                               , {
                                   to: []
                                   , from: []
-                                  , body: null
                                   , options: {}
                               }));
 };
