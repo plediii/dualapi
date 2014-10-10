@@ -10,6 +10,14 @@ describe('dualapi', function () {
 
     
     describe('messageContext', function () {
+
+        it('should provide defaults for each parameter', function () {
+            var ctxt = new dualapi.MessageContext({});            
+            assert.deepEqual(ctxt.to, []);
+            assert.deepEqual(ctxt.from, []);
+            assert.equal(ctxt.body, null);
+            assert.deepEqual(ctxt.options, {});
+        });
         
         describe('.reply', function () {
 
