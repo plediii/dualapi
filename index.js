@@ -8,7 +8,13 @@ var Promise = require('bluebird');
 
 var MessageContext = function (options) {
     var _this = this;
-    _.extend(_this, _.pick(options, 'domain', 'to', 'from', 'body', 'options'));
+    _.extend(_this, _.defaults(_.pick(options, 'domain', 'to', 'from', 'body', 'options')
+                              , {
+                                  to: []
+                                  , from: []
+                                  , body: null
+                                  , options: {}
+                              }));
 };
 
 _.extend(MessageContext.prototype, {
