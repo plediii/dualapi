@@ -102,6 +102,13 @@ inherits(Domain, HevEmitter);
 _.extend(Domain.prototype, {
     mount: function (point, host) {
         var _this = this;
+        if (!(_.isArray(point)
+             || _.isString(point)))
+        {
+            host = point;
+            point = [];
+        }
+            
         if (_.isFunction(host)) {
             mountParametrized(_this, point, host);
         }
