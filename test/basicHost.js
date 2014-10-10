@@ -85,6 +85,17 @@ describe('dualapi', function () {
             dual.send(['host']);
         });
 
+        it('should be possible to mount host trees directly', function (done) {
+            dual.mount({
+                go: function () {
+                    done();
+                }
+            });
+
+            dual.send(['go']);
+        });
+
+
         it('should be possible to mount hosts in a tree structure below a static trunk', function (done) {
             dual.mount(['cookie'], {
                 sword: function () {
