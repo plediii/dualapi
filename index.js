@@ -135,6 +135,7 @@ _.extend(Domain.prototype, {
                 }
             });
         }
+        return _this;
     }
     , unmount: function (point) {
         var _this = this;
