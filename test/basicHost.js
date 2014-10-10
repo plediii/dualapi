@@ -29,6 +29,32 @@ describe('dualapi', function () {
 
         });
     });
+
+    describe('send', function () {
+        it('should return promise value true when an event is matched', function (done) {
+            var dual = dualapi();
+            
+            dual.mount(['food'], function () {});
+
+            dual.send(['food'])
+            .then(function (called) {
+                assert(called);
+                done();
+            });
+        });
+
+        it('should return promise value false when an event is matched', function (done) {
+            var dual = dualapi();
+            
+            dual.mount(['seed'], function () {});
+
+            dual.send(['wad'])
+            .then(function (called) {
+                assert(!called);
+                done();
+            });
+        });
+    });
     
     describe('mounted host', function () {
 
