@@ -99,11 +99,31 @@ var Domain = function () {
 
 inherits(Domain, HevEmitter);
 
+var validPoint = function (point) {
+    return _.isArray(point) || _.isString(point);
+};
+
 _.extend(Domain.prototype, {
     mount: function (point, host) {
         var _this = this;
+        if (!validPoint(point))
+        {
+            host = point;
+            point = [];
+        }
+            
         if (_.isFunction(host)) {
             mountParametrized(_this, point, host);
+        }
+        else if (_.isArray(host)) {
+            _.each(host, function (f) {
+                if (!validPoint(f)) {
+                    _this.mount(point, f)
+                }
+                else {
+                    mountParametrized(_this, point, f);
+                }
+            });
         }
         else if (_.isObject(host)) {
             _.each(host, function (f, n) {

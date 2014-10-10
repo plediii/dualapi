@@ -85,6 +85,17 @@ describe('dualapi', function () {
             dual.send(['host']);
         });
 
+        it('should be possible to mount host trees directly', function (done) {
+            dual.mount({
+                go: function () {
+                    done();
+                }
+            });
+
+            dual.send(['go']);
+        });
+
+
         it('should be possible to mount hosts in a tree structure below a static trunk', function (done) {
             dual.mount(['cookie'], {
                 sword: function () {
@@ -137,6 +148,44 @@ describe('dualapi', function () {
 
             dual.send(['huh', 'pizza']);
             dual.send(['no', 'more']);
+        });
+
+        it('should be possible to mount array', function (done) {
+            var called = [];
+            dual.mount(['yeah'], [
+                function () {
+                    called.push('dragon');
+                }
+                , function () {
+                    called.push('drag-on');
+                }
+            ]);
+
+            dual.send(['yeah']).then(function () {
+                assert.deepEqual(['dragon', 'drag-on'], called);
+                done();
+            });
+        });
+
+        it('should be possible to mount nested array', function (done) {
+            var called = [];
+            dual.mount([], {
+                juicy: {
+                    apple:[
+                        function () {
+                            called.push('no');
+                        }
+                        , function () {
+                            called.push('acceptable');
+                        }
+                    ]
+                }
+            });
+
+            dual.send(['juicy', 'apple']).then(function () {
+                assert.deepEqual(['no', 'acceptable'], called);
+                done();
+            });
         });
 
     });
