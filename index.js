@@ -249,6 +249,30 @@ module.exports = function () {
 _.extend(module.exports, {
     MessageContext: MessageContext
     , broadcaster: broadcaster
+    , synchOption: function (name, fetch) {
+        var cache = {};
+        return function (ctxt, next) {
+            var k = ctxt.params[name];
+            if (cache.hasOwnProperty(k)) {
+                ctxt.options[name] = cache[k];
+                next();
+            }
+            else {
+                return fetch(ctxt, function (err, val) {
+                    if (!err) {
+                        if (!cache.hasOwnProperty(k)) {
+                            cache[k] = val;
+                        }
+                        else {
+                            val = cache[k];
+                        }
+                        ctxt.options[name] = val;
+                    }
+                    next(err);
+                });
+            }
+        };
+    }
 });
 
 
