@@ -149,6 +149,9 @@ _.extend(Domain.prototype, {
     }
     , send: function (to, from, body, options) {
         var _this = this;
+        if (!to || to.length < 1) {
+            return;
+        }
         return _this.emit(to, new MessageContext(_.defaults({
             domain: _this
             , to: to
