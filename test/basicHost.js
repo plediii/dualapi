@@ -38,6 +38,14 @@ describe('dualapi', function () {
             dual.send([void 0], [], 'acting');
         });
 
+        it('should throw exception on empty mount destination', function () {
+            var dual = dualapi();
+            assert.throws(function () {
+                dual.mount([], function () {});
+            }, /empty/);
+        });
+
+
     });
 
     describe('send', function () {

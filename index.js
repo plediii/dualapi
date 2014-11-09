@@ -58,6 +58,9 @@ var broadcaster = function (allower) {
 
 var mountParametrized = function (domain, point, host) {
     var params = [];
+    if (!(_.isArray(point) && point.length > 0)) {
+        throw new Error('Unable to mount empty point');
+    }
     point = _.map(point, function (name, index) {
         if (_.isString(name) 
             && name[0] === ':') {
