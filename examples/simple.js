@@ -37,16 +37,3 @@ domain
         console.log(ctxt.body);
     });
 
-domain
-    .mount(['greetcast'], dual.broadcaster(function (ctxt, allow) {
-        allow(true);
-    }));
-
-domain
-    .live(['greetcast'])
-    .on('message', function (ctxt) {
-        console.log('BROADCAST: ', ctxt.body);
-    });
-domain
-    .send(['greetcast', 'broadcast'], [], 'HELLOOOO');
-

@@ -50,17 +50,3 @@ alice
         console.log(ctxt.body);
     });
 
-
-server
-    .mount(['greetcast'], dual.broadcaster(function (ctxt, allow) {
-        allow(true);
-    }));
-
-alice
-    .live(['server', 'greetcast'])
-    .on('message', function (ctxt) {
-        console.log('broadcast: ', ctxt.body);
-    });
-server
-    .send(['greetcast', 'broadcast'], [], 'HELLOOOO');
-
