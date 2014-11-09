@@ -48,26 +48,6 @@ _.extend(MessageContext.prototype, {
     }
 });
 
-var broadcaster = function (allower) {
-    
-    var subscribers = [];
-
-    return {
-        subscribe: function (ctxt) {
-            return allower(ctxt, function (allow) {
-                if (allow) {
-                    subscribers.push(ctxt.from);
-                }
-            });
-        }
-        , broadcast: function (ctxt) {
-            subscribers = _.filter(subscribers, function (to) {
-                return ctxt.forward(to);
-            });
-        }
-    };
-};
-
 var mountParametrized = function (domain, point, host) {
     var params = [];
     if (!(_.isArray(point) && point.length > 0)) {
@@ -269,7 +249,6 @@ module.exports = function () {
 
 _.extend(module.exports, {
     MessageContext: MessageContext
-    , broadcaster: broadcaster
     , synchOption: function (name, fetch) {
         var cache = {};
         return function (ctxt, next) {
