@@ -99,11 +99,12 @@ var mountParametrized = function (domain, point, host) {
     domain.on(point, f);
 };
 
-var Domain = function () {
+var Domain = function (options) {
     var _this = this;
     _this.hosts = {};
     HevEmitter.call(_this);
     _this.uid = 0;
+    _this.options = options || {};
 };
 
 inherits(Domain, HevEmitter);
@@ -165,7 +166,7 @@ _.extend(Domain.prototype, {
             , options: options
         })))
             .then(function (called) {
-                if (!called) {
+                if (!called && _this.options.verbose) {
                     console.error('Dropped message: ', JSON.stringify(to));
                 }
                 return called
