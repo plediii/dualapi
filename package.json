@@ -33,6 +33,6 @@
   "dependencies": {
     "underscore": "^1.6.0",
     "bluebird": "^2.2.1",
-    "hevemitter": "git://github.com/plediii/HevEmitter.git#master"
+    "hevemitter": "^0.9.1"
   }
 }

@@ -2,7 +2,7 @@
 "use strict";
 
 var _ = require('underscore');
-var HevEmitter = require('HevEmitter').EventEmitter;
+var HevEmitter = require('hevemitter').EventEmitter;
 var inherits = require('util').inherits;
 var Promise = require('bluebird');
 
