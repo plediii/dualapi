@@ -193,9 +193,9 @@ _.extend(Domain.prototype, {
         return new Promise(function (resolve, reject) {
             var from = [_this.nextid()];
             domain.once(from, function (ctxt) {
-                if (ctxt.error) {
-                    return reject(ctxt.error);
-                }
+                // if (ctxt.body.error) {
+                //     return reject(ctxt.body.error);
+                // }
                 resolve(new MessageContext(ctxt));
             })
             return domain.send(to, from, body, options)
