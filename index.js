@@ -58,8 +58,12 @@ var broadcaster = function (allower) {
 
 var mountParametrized = function (domain, point, host) {
     var params = [];
+    if (!(_.isArray(point) && point.length > 0)) {
+        throw new Error('Unable to mount empty point');
+    }
     point = _.map(point, function (name, index) {
-        if (name[0] === ':') {
+        if (_.isString(name) 
+            && name[0] === ':') {
             params.push([name.slice(1), index]);
             return '*'
         }
@@ -95,38 +99,40 @@ var mountParametrized = function (domain, point, host) {
     domain.on(point, f);
 };
 
-var Domain = function () {
+var Domain = function (options) {
     var _this = this;
     _this.hosts = {};
     HevEmitter.call(_this);
     _this.uid = 0;
+    _this.options = options || {};
 };
 
 inherits(Domain, HevEmitter);
 
-var validPoint = function (point) {
-    return _.isArray(point) || _.isString(point);
-};
-
 _.extend(Domain.prototype, {
     mount: function (point, host) {
         var _this = this;
-        if (!validPoint(point))
+
+        if (arguments.length < 2)
         {
             host = point;
             point = [];
         }
-            
+
+        if (_.isString(point)) {
+            point = [point];
+        }
+
         if (_.isFunction(host)) {
             mountParametrized(_this, point, host);
         }
         else if (_.isArray(host)) {
             _.each(host, function (f) {
-                if (!validPoint(f)) {
-                    _this.mount(point, f)
+                if (_.isFunction(f)) {
+                    mountParametrized(_this, point, f);
                 }
                 else {
-                    mountParametrized(_this, point, f);
+                    _this.mount(point, f)
                 }
             });
         }
@@ -160,7 +166,7 @@ _.extend(Domain.prototype, {
             , options: options
         })))
             .then(function (called) {
-                if (!called) {
+                if (!called && _this.options.verbose) {
                     console.error('Dropped message: ', JSON.stringify(to));
                 }
                 return called
