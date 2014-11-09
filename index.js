@@ -34,6 +34,18 @@ _.extend(MessageContext.prototype, {
             , options: _.extend({}, _this.options, options)
         });
     }
+    , error: function (message) {
+        var _this = this;
+        _this.domain.send(['error'].concat(_this.to), [], {
+            message: message
+            , ctxt: {
+                to: _this.to
+                , from: _this.from
+                , body: _this.body
+                , options: _this.options
+            }
+        });
+    }
 });
 
 var broadcaster = function (allower) {
