@@ -242,6 +242,88 @@ describe('dualapi', function () {
 
         });
 
+        describe('.error', function () {
+
+            it('should send to error++to', function (done) {
+                var ctxt = new dualapi.MessageContext({
+                    domain: {
+                        send: function (to, from, body) {
+                            assert.deepEqual(['error', 'haha'], to);
+                            done();
+                        }
+                    }
+                    , to: ['haha']
+                });
+                ctxt.error();
+            });
+
+            it('should send with body having error message', function (done) {
+                var ctxt = new dualapi.MessageContext({
+                    domain: {
+                        send: function (to, from, body) {
+                            assert.equal(body.message, 'life')
+                            done();
+                        }
+                    }
+                });
+                ctxt.error('life');
+            });
+
+            it('should send with body having original context.to', function (done) {
+                var ctxt = new dualapi.MessageContext({
+                    domain: {
+                        send: function (to, from, body) {
+                            assert.deepEqual(body.ctxt.to, ['survive', 'volcano']);
+                            done();
+                        }
+                    }
+                    , to: ['survive', 'volcano']
+                });
+                ctxt.error();
+            });
+
+            it('should send with body having original context.from', function (done) {
+                var ctxt = new dualapi.MessageContext({
+                    domain: {
+                        send: function (to, from, body) {
+                            assert.deepEqual(body.ctxt.from, ['casting', 'by']);
+                            done();
+                        }
+                    }
+                    , from: ['casting', 'by']
+                });
+                ctxt.error();
+            });
+
+            it('should send with body having original context.body', function (done) {
+                var ctxt = new dualapi.MessageContext({
+                    domain: {
+                        send: function (to, from, body) {
+                            assert.deepEqual(body.ctxt.body, 'beautiful');
+                            done();
+                        }
+                    }
+                    , body: 'beautiful'
+                });
+                ctxt.error();
+            });
+
+            it('should send with body having original context.options', function (done) {
+                var ctxt = new dualapi.MessageContext({
+                    domain: {
+                        send: function (to, from, body) {
+                            assert.deepEqual(body.ctxt.options, { your: 'sweater'});
+                            done();
+                        }
+                    }
+                    , options: { your: 'sweater' }
+                });
+                ctxt.error();
+            });
+
+
+        });
+
     });
 
 });
