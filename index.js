@@ -59,7 +59,8 @@ var broadcaster = function (allower) {
 var mountParametrized = function (domain, point, host) {
     var params = [];
     point = _.map(point, function (name, index) {
-        if (name[0] === ':') {
+        if (_.isString(name) 
+            && name[0] === ':') {
             params.push([name.slice(1), index]);
             return '*'
         }
@@ -104,29 +105,30 @@ var Domain = function () {
 
 inherits(Domain, HevEmitter);
 
-var validPoint = function (point) {
-    return _.isArray(point) || _.isString(point);
-};
-
 _.extend(Domain.prototype, {
     mount: function (point, host) {
         var _this = this;
-        if (!validPoint(point))
+
+        if (arguments.length < 2)
         {
             host = point;
             point = [];
         }
-            
+
+        if (_.isString(point)) {
+            point = [point];
+        }
+
         if (_.isFunction(host)) {
             mountParametrized(_this, point, host);
         }
         else if (_.isArray(host)) {
             _.each(host, function (f) {
-                if (!validPoint(f)) {
-                    _this.mount(point, f)
+                if (_.isFunction(f)) {
+                    mountParametrized(_this, point, f);
                 }
                 else {
-                    mountParametrized(_this, point, f);
+                    _this.mount(point, f)
                 }
             });
         }
