@@ -1,7 +1,7 @@
 /*jslint node: true */
 "use strict";
 
-var _ = require('underscore');
+var _ = require('lodash');
 var HevEmitter = require('hevemitter').EventEmitter;
 var inherits = require('util').inherits;
 var Promise = require('bluebird');

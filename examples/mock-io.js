@@ -2,7 +2,7 @@
 "use strict";
 
 var EventEmitter = require('events').EventEmitter;
-var _ = require('underscore');
+var _ = require('lodash');
 
 var socket = function () {
     

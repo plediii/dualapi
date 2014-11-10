@@ -31,8 +31,8 @@
     "grunt-contrib-jshint": "~0.8.0"
   },
   "dependencies": {
-    "underscore": "^1.6.0",
     "bluebird": "^2.2.1",
-    "hevemitter": "^0.9.1"
+    "hevemitter": "^0.9.1",
+    "lodash": "^2.4.1"
   }
 }

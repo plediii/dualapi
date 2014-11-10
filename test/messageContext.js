@@ -2,7 +2,7 @@
 "use strict";
 
 var dualapi = require('../index');
-var _ = require('underscore');
+var _ = require('lodash');
 var assert = require('assert');
 var EventEmitter = require('events').EventEmitter;
 
