@@ -52,10 +52,6 @@ aliceDomain.mount(['supercomputer'], function (ctxt) {
 });
 
 aliceDomain.mount(['ready'], function () {
-    aliceDomain.send(['server', 'scientist'], ['tip'], 'Alice data');
-});
-
-aliceDomain.mount(['ready'], function () {
     aliceDomain.get(['supercomputer'], 'alice super computer data')
     .then(function (ctxt) {
         console.log('client side super computer: ', ctxt.body);
