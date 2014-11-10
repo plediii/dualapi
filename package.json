@@ -1,8 +1,9 @@
 {
   "name": "dualapi",
-  "version": "0.0.0",
+  "version": "0.8.0",
   "description": "Dual REST API",
-  "main": "dualapi.js",
+  "private": false,
+  "main": "index.js",
   "scripts": {
     "test": "mocha"
   },
@@ -32,7 +33,7 @@
     "mocha": "~1.17.0"
   },
   "dependencies": {
-    "bluebird": "^2.2.1",
+    "bluebird": "^2.2.2",
     "hevemitter": "^0.9.1",
     "lodash": "^2.4.1"
   }
