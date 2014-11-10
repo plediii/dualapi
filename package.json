@@ -1,7 +1,7 @@
 {
   "name": "dualapi",
   "version": "0.8.0",
-  "description": "Dual REST API",
+  "description": "Framework for distributed javascript applications",
   "private": false,
   "main": "index.js",
   "scripts": {
