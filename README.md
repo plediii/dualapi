@@ -1,1 +1,7 @@
-Dual REST API
+# DualAPI
+
+Distributed application framework.
+
+## Creating domains
+
+
