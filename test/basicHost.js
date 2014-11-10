@@ -14,10 +14,10 @@ describe('dualapi', function () {
             var called = [];
             dual
                 .mount(['big'], function () {
-                    called.push('bad')
+                    called.push('bad');
                 })
                 .mount(['wolf'], function () {
-                    called.push('laser')
+                    called.push('laser');
                 });
 
             dual.send(['big']);

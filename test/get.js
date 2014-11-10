@@ -37,7 +37,7 @@ describe('dualapi', function () {
 
         it('should attach options', function (done) {
             dual.mount(['scream'], function (ctxt) {
-                assert.deepEqual(ctxt.options, { corridor: 'thousand' })
+                assert.deepEqual(ctxt.options, { corridor: 'thousand' });
                 done();
             });
             dual.get(['scream'], null, { corridor: 'thousand' });

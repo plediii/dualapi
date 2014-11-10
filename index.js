@@ -1,4 +1,5 @@
 /*jslint node: true */
+/* global -Promise */
 "use strict";
 
 var _ = require('lodash');
@@ -57,7 +58,7 @@ var mountParametrized = function (domain, point, host) {
         if (_.isString(name) 
             && name[0] === ':') {
             params.push([name.slice(1), index]);
-            return '*'
+            return '*';
         }
         else {
             return name;
@@ -79,13 +80,13 @@ var mountParametrized = function (domain, point, host) {
             f = function (msg, next) {
                 parseParams(msg);
                 return host(msg, next);
-            }
+            };
         }
         else {
             f = function (msg) {
                 parseParams(msg);
                 return host(msg);
-            }
+            };
         }
     }
     domain.on(point, f);
@@ -124,14 +125,14 @@ _.extend(Domain.prototype, {
                     mountParametrized(_this, point, f);
                 }
                 else {
-                    _this.mount(point, f)
+                    _this.mount(point, f);
                 }
             });
         }
         else if (_.isObject(host)) {
             _.each(host, function (f, n) {
                 if (_.isObject(f)) {
-                    _this.mount(point.concat(n), f)
+                    _this.mount(point.concat(n), f);
                 }
                 else {
                     mountParametrized(_this, point.concat(n), f);
@@ -161,7 +162,7 @@ _.extend(Domain.prototype, {
                 if (!called && _this.options.verbose) {
                     console.error('Dropped message: ', JSON.stringify(to));
                 }
-                return called
+                return called;
             });
     }
     , nextid: function () {
@@ -177,7 +178,7 @@ _.extend(Domain.prototype, {
                 //     return reject(ctxt.body.error);
                 // }
                 resolve(new MessageContext(ctxt));
-            })
+            });
             return domain.send(to, from, body, options)
                 .catch(reject);
         });

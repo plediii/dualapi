@@ -261,7 +261,7 @@ describe('dualapi', function () {
                 var ctxt = new dualapi.MessageContext({
                     domain: {
                         send: function (to, from, body) {
-                            assert.equal(body.message, 'life')
+                            assert.equal(body.message, 'life');
                             done();
                         }
                     }
