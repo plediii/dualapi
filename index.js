@@ -51,21 +51,29 @@ _.extend(MessageContext.prototype, {
 
 var mountParametrized = function (domain, point, host) {
     var params = [];
+    var tailparams = [];
     if (!(_.isArray(point) && point.length > 0)) {
         throw new Error('Unable to mount empty point');
     }
     point = _.map(point, function (name, index) {
         if (_.isString(name) 
             && name[0] === ':') {
-            params.push([name.slice(1), index]);
-            return '*';
+            if (name[1] === ':') {
+                tailparams.push([name.slice(2), 1 + index]);
+                return '**';
+            }
+            else {
+                params.push([name.slice(1), index]);
+                return '*';
+            }
         }
         else {
             return name;
         }
     });
     var f;
-    if (params.length === 0) {
+    if (params.length === 0 
+        && tailparams.length === 0) {
         f = host;
     }
     else {
@@ -73,6 +81,9 @@ var mountParametrized = function (domain, point, host) {
             msg.params = {};
             _.each(params, function (param) {
                 msg.params[param[0]] = msg.to[param[1]];
+            });
+            _.each(tailparams, function (tailparam) {
+                msg.params[tailparam[0]] = msg.to.slice(tailparam[1]);
             });
         };
 
