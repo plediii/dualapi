@@ -59,7 +59,7 @@ var mountParametrized = function (domain, point, host) {
         if (_.isString(name) 
             && name[0] === ':') {
             if (name[1] === ':') {
-                tailparams.push([name.slice(2), 1 + index]);
+                tailparams.push([name.slice(2), index]);
                 return '**';
             }
             else {

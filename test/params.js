@@ -22,7 +22,7 @@ describe('dualapi', function () {
         it('should be able to mount host points matching route tails', function (done) {
             var dual = dualapi();
             dual.mount(['resolve', '::who'], function (ctxt) {
-                assert.deepEqual(ctxt.params.who, ['is', 'doing', 'the', 'dishes']);
+                assert.deepEqual(ctxt.params.who, ['frank', 'is', 'doing', 'the', 'dishes']);
                 done();
             });
 
