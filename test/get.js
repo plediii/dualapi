@@ -101,6 +101,19 @@ describe('dualapi', function () {
             });
         });
 
+        it('should not leak request listeners', function (done) {
+            dual.mount(['dernier'], function (ctxt) {
+                ctxt.reply('voyage');
+            });
+            var initialCount = dual.listeners('**').length;
+            dual.get(['dernier'], 'last')
+                .then(function (ctxt) {
+                    assert.equal('voyage', ctxt.body);
+                    assert.equal(initialCount, dual.listeners('**').length);
+                    done();
+                });
+        });
+
     });
 
 });
