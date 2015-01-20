@@ -6,6 +6,7 @@ var _ = require('lodash');
 var HevEmitter = require('hevemitter').EventEmitter;
 var inherits = require('util').inherits;
 var Promise = require('bluebird');
+var uid = require('./uid')
 
 var MessageContext = function (options) {
     var _this = this;
@@ -222,38 +223,39 @@ _.extend(Domain.prototype, {
         options = _.defaults({}, options, {
             timeout: 120
         });
-        return new Promise(function (resolve, reject) {
-            var from = [_this.nextid()];
-            var timer;
-            var receiver;
-            if (options.timeout > 0) {
-                timer = setTimeout(function () {
-                    domain.removeListener(from, receiver);
-                    resolve(new MessageContext({
-                        options: {
-                            statusCode: '408'
-                        }
-                    }));
-                }, 1000 * options.timeout);
-            }
-            receiver = function (ctxt) {
-                if (timer) {
-                    clearTimeout(timer);
-                }
-                resolve(new MessageContext(ctxt));
-            };
-            domain.once(from, receiver);
-            return domain.send(to, from, body, options)
-                .then(function (called) {
-                    if (!called) {
-                        return resolve(new MessageContext({
+        return uid()
+            .then(function (requestid) {
+                var from = ['request', requestid];
+                var timer;
+                var receiver;
+                if (options.timeout > 0) {
+                    timer = setTimeout(function () {
+                        domain.removeListener(from, receiver);
+                        resolve(new MessageContext({
                             options: {
-                                statusCode: '503'
+                                statusCode: '408'
                             }
                         }));
+                    }, 1000 * options.timeout);
+                }
+                receiver = function (ctxt) {
+                    if (timer) {
+                        clearTimeout(timer);
                     }
-                });
-        });
+                    resolve(new MessageContext(ctxt));
+                };
+                domain.once(from, receiver);
+                return domain.send(to, from, body, options)
+                    .then(function (called) {
+                        if (!called) {
+                            return resolve(new MessageContext({
+                                options: {
+                                    statusCode: '503'
+                                }
+                            }));
+                        }
+                    });
+            });
     }
     , live: function (to) {
         var _this = this;
