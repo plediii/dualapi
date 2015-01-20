@@ -84,7 +84,7 @@ describe('dualapi', function () {
             dual.mount(['cleveland'], function (ctxt) {
                 _.delay(function () {
                     ctxt.reply('years ago');
-                }, 1500)
+                }, 1500);
             });
             dual.get(['cleveland'], null, { timeout: 0 })
             .then(function (ctxt) {

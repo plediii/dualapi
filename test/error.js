@@ -1,4 +1,5 @@
 /*jslint node: true */
+/* global -Promise */
 "use strict";
 
 var dualapi = require('../index');
@@ -96,10 +97,10 @@ describe('dualapi', function () {
 
                 it('should be triggered with the original context as body.context', function (done) {
                     d.mount(['error'], function (ctxt) {
-                        assert(_.isEqual(ctxt.body.context.to, ['thrower']))
+                        assert(_.isEqual(ctxt.body.context.to, ['thrower']));
                         assert(_.isEqual(ctxt.body.context.from, ['changing']));
-                        assert.equal('night', ctxt.body.context.body.sleep)
-                        assert.equal('sun', ctxt.body.context.options.people)
+                        assert.equal('night', ctxt.body.context.body.sleep);
+                        assert.equal('sun', ctxt.body.context.options.people);
                         done();
                     });
                     d.mount(['thrower'], thrower);

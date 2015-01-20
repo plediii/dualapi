@@ -233,7 +233,7 @@ _.extend(Domain.prototype, {
                         options: {
                             statusCode: '408'
                         }
-                    }))
+                    }));
                 }, 1000 * options.timeout);
             }
             receiver = function (ctxt) {

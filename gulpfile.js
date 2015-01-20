@@ -16,6 +16,7 @@ gulp.task('lint', function() {
                          , 'it': false
                          , 'exports': false
                          , 'before': false
+                         , 'beforeEach': false
                        }
         }))
     .pipe(jshint.reporter(stylish));
