@@ -6,6 +6,7 @@ var _ = require('lodash');
 var HevEmitter = require('hevemitter').EventEmitter;
 var inherits = require('util').inherits;
 var Promise = require('bluebird');
+var uid = require('./uid');
 
 var MessageContext = function (options) {
     var _this = this;
@@ -144,7 +145,6 @@ var Domain = function (options) {
     var _this = this;
     _this.hosts = {};
     HevEmitter.call(_this);
-    _this.uid = 0;
     _this.options = options || {};
 };
 
@@ -213,59 +213,63 @@ _.extend(Domain.prototype, {
                 return called;
             });
     }
-    , nextid: function () {
-        return '' + ((this.uid)++);
-    }
+    , uid: uid
     , get: function (to, body, options) {
         var _this = this;
         var domain = _this;
         options = _.defaults({}, options, {
             timeout: 120
         });
-        return new Promise(function (resolve, reject) {
-            var from = [_this.nextid()];
-            var timer;
-            var receiver;
-            if (options.timeout > 0) {
-                timer = setTimeout(function () {
-                    domain.removeListener(from, receiver);
-                    resolve(new MessageContext({
-                        options: {
-                            statusCode: '408'
-                        }
-                    }));
-                }, 1000 * options.timeout);
-            }
-            receiver = function (ctxt) {
-                if (timer) {
-                    clearTimeout(timer);
-                }
-                resolve(new MessageContext(ctxt));
-            };
-            domain.once(from, receiver);
-            return domain.send(to, from, body, options)
-                .then(function (called) {
-                    if (!called) {
-                        return resolve(new MessageContext({
-                            options: {
-                                statusCode: '503'
-                            }
-                        }));
+        return uid()
+            .then(function (requestid) {
+                return new Promise(function (resolve) {
+                    var from = [requestid + 'request'];
+                    var timer;
+                    var receiver;
+                    if (options.timeout > 0) {
+                        timer = setTimeout(function () {
+                            domain.removeListener(from, receiver);
+                            resolve(new MessageContext({
+                                options: {
+                                    statusCode: '408'
+                                }
+                            }));
+                        }, 1000 * options.timeout);
                     }
+                    receiver = function (ctxt) {
+                        if (timer) {
+                            clearTimeout(timer);
+                        }
+                        resolve(new MessageContext(ctxt));
+                    };
+                    domain.once(from, receiver);
+                    return domain.send(to, from, body, options)
+                        .then(function (called) {
+                            if (!called) {
+                                return resolve(new MessageContext({
+                                    options: {
+                                        statusCode: '503'
+                                    }
+                                }));
+                            }
+                        });
                 });
-        });
+            });
     }
     , live: function (to) {
-        var _this = this;
-        var domain = _this;
-        var from = [_this.nextid()];
-        var liveEmitter = new HevEmitter();
-        var forwarder =  function (ctxt) {
-            liveEmitter.emit('dual', new MessageContext(ctxt));
-        };
-        domain.on(from, forwarder);
-        domain.send(to.concat('subscribe'), from);
-        return liveEmitter;
+        return uid()
+            .then(function (nextid) {
+                var _this = this;
+                var domain = _this;
+                var from = [nextid()];
+                var liveEmitter = new HevEmitter();
+                var forwarder =  function (ctxt) {
+                    liveEmitter.emit('dual', new MessageContext(ctxt));
+                };
+                domain.on(from, forwarder);
+                domain.send(to.concat('subscribe'), from);
+                return liveEmitter;
+            });
     }
     , open: function (mount, socket, firewall) {
         var _this = this;
