@@ -1,6 +1,6 @@
 {
   "name": "dualapi",
-  "version": "0.8.2",
+  "version": "0.9.0",
   "description": "Framework for distributed javascript applications",
   "private": false,
   "main": "index.js",
