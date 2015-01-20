@@ -16,7 +16,7 @@ describe('dualapi', function () {
             assert.deepEqual(ctxt.to, []);
             assert.deepEqual(ctxt.from, []);
             assert.equal(ctxt.body, null);
-            assert.deepEqual(ctxt.options, {});
+            assert(_.isObject(ctxt.options));
         });
         
         describe('.reply', function () {
@@ -53,7 +53,7 @@ describe('dualapi', function () {
                     domain: {
                         send: function (to, from, body, options) {
                             if (options) {
-                                assert.deepEqual(options, {});
+                                assert.notEqual(options.beautiful, 'day');
                             }
                             done();
                         }
@@ -68,7 +68,20 @@ describe('dualapi', function () {
                 var ctxt = new dualapi.MessageContext({
                     domain: {
                         send: function (to, from, body, options) {
-                            assert.deepEqual(options, {addendum: 'ps'});
+                            assert.equal(options.addendum, 'ps');
+                            done();
+                        }
+                    }
+                    , from: ['bonjour']
+                });
+                ctxt.reply(null, {addendum: 'ps'});
+            });
+
+            it('should default to 200 status code', function (done) {
+                var ctxt = new dualapi.MessageContext({
+                    domain: {
+                        send: function (to, from, body, options) {
+                            assert.equal(options.statusCode, '200');
                             done();
                         }
                     }

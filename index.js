@@ -20,6 +20,7 @@ var MessageContext = function (options) {
 _.extend(MessageContext.prototype, {
     reply: function (body, options) {
         var _this = this;
+        options = _.defaults({}, options, { statusCode: '200' });
         return _this.domain.send(_this.from, _this.to, body, options);
     }
     , forward: function (to, options) {
@@ -218,16 +219,40 @@ _.extend(Domain.prototype, {
     , get: function (to, body, options) {
         var _this = this;
         var domain = _this;
+        options = _.defaults({}, options, {
+            timeout: 120
+        });
         return new Promise(function (resolve, reject) {
             var from = [_this.nextid()];
-            domain.once(from, function (ctxt) {
-                // if (ctxt.body.error) {
-                //     return reject(ctxt.body.error);
-                // }
+            var timer;
+            var receiver;
+            if (options.timeout > 0) {
+                timer = setTimeout(function () {
+                    domain.removeListener(from, receiver);
+                    resolve(new MessageContext({
+                        options: {
+                            statusCode: '408'
+                        }
+                    }))
+                }, 1000 * options.timeout);
+            }
+            receiver = function (ctxt) {
+                if (timer) {
+                    clearTimeout(timer);
+                }
                 resolve(new MessageContext(ctxt));
-            });
+            };
+            domain.once(from, receiver);
             return domain.send(to, from, body, options)
-                .catch(reject);
+                .then(function (called) {
+                    if (!called) {
+                        return resolve(new MessageContext({
+                            options: {
+                                statusCode: '503'
+                            }
+                        }));
+                    }
+                });
         });
     }
     , live: function (to) {
