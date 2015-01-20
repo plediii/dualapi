@@ -71,12 +71,48 @@ var mountParametrized = function (domain, point, host) {
             return name;
         }
     });
+    var h = Promise.method(host);
     var f;
-    if (params.length === 0 
-        && tailparams.length === 0) {
-        f = host;
+    if (host.length > 1) {
+        f = function (msg, done) {
+            return h(msg, done)
+                .catch(function (err) {
+                    if (!msg.to || msg.to.length < 1
+                        || msg.to[0] !== 'error') {
+                        return domain.send(['error'].concat(msg.to), [], {
+                            error: err
+                            , context: { 
+                                to: msg.to
+                                , from: msg.from
+                                , body: msg.body
+                                , options: msg.options
+                            }
+                        });
+                    }
+                });
+        };
     }
     else {
+        f = function (msg) {
+            return h(msg)
+                .catch(function (err) {
+                    if (!msg.to || msg.to.length < 1
+                        || msg.to[0] !== 'error') {
+                        return domain.send(['error'].concat(msg.to), [], {
+                            error: err
+                            , context: { 
+                                to: msg.to
+                                , from: msg.from
+                                , body: msg.body
+                                , options: msg.options
+                            }
+                        });
+                    }
+                });
+        };
+    }
+    if (params.length !== 0 
+        || tailparams.length !== 0) {
         var parseParams = function (msg) {
             msg.params = {};
             _.each(params, function (param) {
@@ -86,17 +122,17 @@ var mountParametrized = function (domain, point, host) {
                 msg.params[tailparam[0]] = msg.to.slice(tailparam[1]);
             });
         };
-
-        if (host.length === 2) {
+        var g = f;
+        if (g.length > 1) {
             f = function (msg, next) {
                 parseParams(msg);
-                return host(msg, next);
+                return g(msg, next);
             };
         }
         else {
             f = function (msg) {
                 parseParams(msg);
-                return host(msg);
+                return g(msg);
             };
         }
     }

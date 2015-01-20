@@ -24,6 +24,9 @@ describe('dualapi', function () {
         it('a sequence of hosts at the same mount point can be blocked by neglecting next', function (done) {
             var count = 0;
             var blocked = true;
+            dual.mount(['error'], function (ctxt) {
+                assert.equal(ctxt.body.error, 'failure');
+            });
             dual.mount(['assembly2', 'point1'], function (ctxt, next) {
                 count++;
                 if (count > 1) {
