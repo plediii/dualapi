@@ -251,6 +251,13 @@ _.extend(Domain.prototype, {
             });
     }
     , uid: uid
+    , request: function (to, body, options) {
+        var _this = this;
+        return _this.get(to, body, options)
+        .then(function (ctxt) {
+            return [ctxt.body, ctxt.options, ctxt];
+        });
+    }
     , get: function (to, body, options) {
         var _this = this;
         var domain = _this;

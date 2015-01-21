@@ -61,7 +61,7 @@ describe('dualapi', function () {
             dual.get(['cleveland'], null, { timeout: 1 })
             .then(function (ctxt) {
                 var after = Date.now();
-                assert(after - before > 1000);
+                assert(after - before >= 1000);
                 assert(after - before < 2000);
                 done();
             });
