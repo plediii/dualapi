@@ -19,14 +19,36 @@ var MessageContext = function (options) {
 };
 
 _.extend(MessageContext.prototype, {
-    reply: function (body, options) {
+    send: function (to, from, body, options) {
+        return this.domain.send(to, from, body, options);
+    }
+    , get: function (to, body, options) {
         var _this = this;
+        return _this.domain.get(to, body, options);
+    }
+    , proxy: function (to, options) {
+        var _this = this;
+        return _this.get(to, _this.body, _.extend({}, _this.options, options));
+    }
+    , reply: function (body, options) {
         options = _.defaults({}, options, { statusCode: '200' });
-        return _this.domain.send(_this.from, _this.to, body, options);
+        var _this = this;
+        return _this.send(_this.from, _this.to, body, options);
+    }
+    , replyPromise: function (p) {
+        var _this = this;
+        return Promise.resolve(p)
+            .then(function (msg) {
+                return _this.reply(msg.message || msg, { statusCode: msg.statusCode || '200' });
+            })
+            .catch(function (msg) {
+                return _this.reply(msg.message || msg, { statusCode: msg.statusCode || '500' });
+            })
+
     }
     , forward: function (to, options) {
         var _this = this;
-        return _this.domain.send(to, _this.from, _this.body, _.extend({}, _this.options, options));
+        return _this.send(to, _this.from, _this.body, _.extend({}, _this.options, options));
     }
     , transfer: function (mount, socket, options) {
         var _this = this;
@@ -39,7 +61,7 @@ _.extend(MessageContext.prototype, {
     }
     , error: function (message) {
         var _this = this;
-        _this.domain.send(['error'].concat(_this.to), [], {
+        _this.send(['error'].concat(_this.to), [], {
             message: message
             , ctxt: {
                 to: _this.to
@@ -48,6 +70,21 @@ _.extend(MessageContext.prototype, {
                 , options: _this.options
             }
         });
+    }
+    , toJSON: function () {
+        return _.pick(this, 'to', 'from', 'body', 'options')
+    }
+    , parent: function (n) {
+        if (n !== 0) {
+            n = n || 1;
+        }
+        var _this = this;
+        if (n > _this.to.length) {
+            throw new Error('Invalid parent slice ' + n + ' for point ' + _this.to.join('/'));
+        }
+        else {
+            return _this.to.slice(0, _this.to.length - n);
+        }
     }
 });
 
