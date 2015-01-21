@@ -119,7 +119,7 @@ var mountParametrized = function (domain, point, host) {
                     if (!msg.to || msg.to.length < 1
                         || msg.to[0] !== 'error') {
                         return domain.send(['error'].concat(msg.to), [], {
-                            error: err
+                            message: err
                             , context: { 
                                 to: msg.to
                                 , from: msg.from
@@ -138,7 +138,7 @@ var mountParametrized = function (domain, point, host) {
                     if (!msg.to || msg.to.length < 1
                         || msg.to[0] !== 'error') {
                         return domain.send(['error'].concat(msg.to), [], {
-                            error: err
+                            message: err
                             , context: { 
                                 to: msg.to
                                 , from: msg.from
