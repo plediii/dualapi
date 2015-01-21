@@ -78,9 +78,9 @@ describe('dualapi', function () {
                 });
 
 
-                it('should be triggered with the exception as body.error', function (done) {
+                it('should be triggered with the exception as body.message', function (done) {
                     d.mount(['error'], function (ctxt) {
-                        assert.equal('battery', ctxt.body.error);
+                        assert.equal('battery', ctxt.body.message);
                         done();
                     });
                     d.mount(['thrower'], thrower);

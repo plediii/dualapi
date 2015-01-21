@@ -5,6 +5,7 @@ var dualapi = require('../index');
 var _ = require('lodash');
 var assert = require('assert');
 var EventEmitter = require('events').EventEmitter;
+var Promise = require('bluebird');
 
 describe('dualapi', function () {
 
@@ -17,6 +18,23 @@ describe('dualapi', function () {
             assert.deepEqual(ctxt.from, []);
             assert.equal(ctxt.body, null);
             assert(_.isObject(ctxt.options));
+        });
+
+        it('should consist of only dual parameters in toJSON', function () {
+            var ctxt = new dualapi.MessageContext({
+                domain: { twenty: 'years'}
+                , to: ['vice', 'president']
+                , from: ['senate']
+                , body: { maybe: 'house' }
+                , options: { punching: 'bag' }
+            });      
+            var json = ctxt.toJSON();
+            var jsonKeys = _.keys(json);
+            assert.equal(4, jsonKeys.length);
+            assert.deepEqual(json.to, ['vice', 'president']);
+            assert.deepEqual(json.from, ['senate']);
+            assert.equal(json.body.maybe, 'house');
+            assert.equal(json.options.punching, 'bag');
         });
         
         describe('.reply', function () {
@@ -334,6 +352,222 @@ describe('dualapi', function () {
                 ctxt.error();
             });
 
+
+        });
+
+        describe(' .send', function () {
+
+            it('should alias domain.send ', function (done) {
+                var ctxt = new dualapi.MessageContext({
+                    domain: {
+                        send: function (to, from, body, options) {
+                            assert.deepEqual(to, ['the', 'curious']);
+                            assert.deepEqual(from, ['case', 'of']);
+                            assert.equal('jr', body.cleveland);
+                            assert.equal('rock', options.kid);
+                            done();
+                        }
+                    }
+                });
+                ctxt.send(['the', 'curious'], ['case', 'of'], { cleveland: 'jr' }, { kid: 'rock' });
+            });
+
+        });
+
+        describe('.get', function () {
+
+            it('should alias domain.get', function (done) {
+                var ctxt = new dualapi.MessageContext({
+                    domain: {
+                        get: function (to, body, options) {
+                            assert.deepEqual(to, ['the', 'curious']);
+                            assert.equal('jr', body.cleveland);
+                            assert.equal('rock', options.kid);
+                            done();
+                        }
+                    }
+                });
+                ctxt.get(['the', 'curious'], { cleveland: 'jr' }, { kid: 'rock' });
+            });
+
+        });
+
+        describe('.proxy', function () {
+
+            var dual;
+            beforeEach(function () {
+                dual = dualapi();
+            });
+
+            it('should create new get request to provided destination', function (done) {
+                dual.mount({
+                    happy: function (ctxt) {
+                        return ctxt.reply('new year');
+                    }
+                    , mudumbo: function (ctxt) {
+                        return ctxt.proxy(['happy'])
+                            .then(function (proxyctxt) {
+                                ctxt.reply(proxyctxt.body)
+                            })
+                            .catch(done);
+                    }
+                });
+                dual.get(['mudumbo'])
+                    .then(function (ctxt) {
+                        assert.equal('new year', ctxt.body);
+                        done();
+                    })
+                    .catch(done);
+            });
+
+            it('should transmit existing options', function (done) {
+                dual.mount({
+                    happy: function (ctxt) {
+                        assert.equal('daily', ctxt.body.tine);
+                        done();
+                    }
+                    , mudumbo: function (ctxt) {
+                        return ctxt.proxy(['happy']);
+                    }
+                });
+                dual.get(['mudumbo'], { tine: 'daily' });
+            });
+
+            it('should be able to override existing options', function (done) {
+                dual.mount({
+                    happy: function (ctxt) {
+                        assert.equal('business', ctxt.options.tine);
+                        done();
+                    }
+                    , mudumbo: function (ctxt) {
+                        ctxt.proxy(['happy'], { tine: 'business' });
+                    }
+                });
+                dual.get(['mudumbo'], { tine: 'daily' });
+            });
+
+        });
+
+        describe('.replyPromise', function () {
+
+            var dual;
+            beforeEach(function () {
+                dual = dualapi();
+            });
+
+            it('should reply with resolved as body by default', function (done) {
+                dual.mount({
+                    playing: function (ctxt) {
+                        return ctxt.replyPromise(Promise.resolve('long'));
+                    }
+                });
+                dual.get(['playing'])
+                .then(function (ctxt) {
+                    assert.equal(ctxt.body, 'long');
+                    done();
+                })
+                .catch(done);
+            });
+
+            it('should reply with reject as body by default', function (done) {
+                dual.mount({
+                    playing: function (ctxt) {
+                        return ctxt.replyPromise(Promise.reject('wing'));
+                    }
+                });
+                dual.get(['playing'])
+                .then(function (ctxt) {
+                    assert.equal(ctxt.body, 'wing');
+                    done();
+                })
+                .catch(done);
+            });
+
+            it('should reply success status code when resolved by default', function (done) {
+                dual.mount({
+                    playing: function (ctxt) {
+                        return ctxt.replyPromise(Promise.resolve('long'));
+                    }
+                });
+                dual.get(['playing'])
+                    .then(function (ctxt) {
+                        assert.equal(ctxt.options.statusCode, '200');
+                        done();
+                    })
+                    .catch(done);
+            });
+
+            it('should reply internal error status code when rejected by default', function (done) {
+                dual.mount({
+                    playing: function (ctxt) {
+                        return ctxt.replyPromise(Promise.reject('long'));
+                    }
+                });
+                dual.get(['playing'])
+                    .then(function (ctxt) {
+                        assert.equal(ctxt.options.statusCode, '500');
+                        done();
+                    })
+                    .catch(done);
+            });
+
+            it('should reply with resolved.body when available', function (done) {
+                dual.mount({
+                    playing: function (ctxt) {
+                        return ctxt.replyPromise(Promise.resolve({ message: 'ring' }));
+                    }
+                });
+                dual.get(['playing'])
+                    .then(function (ctxt) {
+                        assert.equal(ctxt.body, 'ring');
+                        done();
+                    })
+                    .catch(done);
+            });
+
+            it('should reply resolved.statusCode when available', function (done) {
+                dual.mount({
+                    playing: function (ctxt) {
+                        return ctxt.replyPromise(Promise.resolve({ 
+                            message: 'ring'
+                            , statusCode: '420'
+                        }));
+                    }
+                });
+                dual.get(['playing'])
+                    .then(function (ctxt) {
+                        assert.equal(ctxt.options.statusCode, '420');
+                        done();
+                    })
+                    .catch(done);
+            });
+
+        });
+
+        describe('.parent', function (ctxt) {
+
+            it('should return the route up to destination', function () {
+                var ctxt = new dualapi.MessageContext({
+                    to: ['play', 'him', 'off']
+                });
+                assert.deepEqual(ctxt.parent(), ['play', 'him']);
+            });
+
+            it('should return the parent parent when given 2', function () {
+                var ctxt = new dualapi.MessageContext({
+                    to: ['play', 'him', 'off']
+                });
+                assert.deepEqual(ctxt.parent(2), ['play']);
+            });
+
+            it('should throw exception when given parent depth greater than destination', function () {
+                var ctxt = new dualapi.MessageContext({
+                    to: ['play', 'him', 'off']
+                });
+                assert.throws(function () {
+                    ctxt.parent(4);
+                });
+            });
 
         });
 
