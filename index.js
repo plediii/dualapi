@@ -293,21 +293,6 @@ _.extend(Domain.prototype, {
                 });
             });
     }
-    , live: function (to) {
-        return uid()
-            .then(function (nextid) {
-                var _this = this;
-                var domain = _this;
-                var from = [nextid()];
-                var liveEmitter = new HevEmitter();
-                var forwarder =  function (ctxt) {
-                    liveEmitter.emit('dual', new MessageContext(ctxt));
-                };
-                domain.on(from, forwarder);
-                domain.send(to.concat('subscribe'), from);
-                return liveEmitter;
-            });
-    }
     , open: function (mount, socket, firewall) {
         var _this = this;
         _this.mount(mount.concat('**'), function (ctxt) {
