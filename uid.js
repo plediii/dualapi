@@ -53,7 +53,6 @@ var regen = _.throttle(function () {
             key = Promise.resolve(digest(key, newkey));
         })
 }, 60000);
-setInterval(regen, 1000 * 60 * 10);
 
 var counter = 0;
 var previousUid = '';
@@ -61,6 +60,9 @@ var previousUid = '';
 module.exports = function () {
     return key.then(function (k) {
         previousUid = digest(previousUid + k + (counter++) + Date.now());
+        if (counter % 50 === 0) {
+            regen();
+        }
         return previousUid;
     });
 };
