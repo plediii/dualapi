@@ -26,6 +26,9 @@ _.extend(MessageContext.prototype, {
         var _this = this;
         return _this.domain.get(to, body, options);
     }
+    , request: function (to, body, options) {
+        return this.domain.request(to, body, options);
+    }
     , proxy: function (to, options) {
         var _this = this;
         return _this.get(to, _this.body, _.extend({}, _this.options, options));

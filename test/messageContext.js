@@ -393,6 +393,24 @@ describe('dualapi', function () {
 
         });
 
+        describe('.request', function () {
+
+            it('should alias domain.request', function (done) {
+                var ctxt = new dualapi.MessageContext({
+                    domain: {
+                        request: function (to, body, options) {
+                            assert.deepEqual(to, ['the', 'curious']);
+                            assert.equal('jr', body.cleveland);
+                            assert.equal('rock', options.kid);
+                            done();
+                        }
+                    }
+                });
+                ctxt.request(['the', 'curious'], { cleveland: 'jr' }, { kid: 'rock' });
+            });
+
+        });
+
         describe('.proxy', function () {
 
             var dual;
