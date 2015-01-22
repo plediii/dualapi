@@ -51,7 +51,7 @@ var regen = _.throttle(function () {
     keygen()
         .then(function (newkey) {
             key = Promise.resolve(digest(key, newkey));
-        })
+        });
 }, 60000);
 
 var counter = 0;

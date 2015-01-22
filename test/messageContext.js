@@ -1,4 +1,5 @@
 /*jslint node: true */
+/* global -Promise */
 "use strict";
 
 var dualapi = require('../index');
@@ -407,7 +408,7 @@ describe('dualapi', function () {
                     , mudumbo: function (ctxt) {
                         return ctxt.proxy(['happy'])
                             .then(function (proxyctxt) {
-                                ctxt.reply(proxyctxt.body)
+                                ctxt.reply(proxyctxt.body);
                             })
                             .catch(done);
                     }

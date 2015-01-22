@@ -43,7 +43,7 @@ _.extend(MessageContext.prototype, {
             })
             .catch(function (msg) {
                 return _this.reply(msg.message || msg, { statusCode: msg.statusCode || '500' });
-            })
+            });
 
     }
     , forward: function (to, options) {
@@ -72,7 +72,7 @@ _.extend(MessageContext.prototype, {
         });
     }
     , toJSON: function () {
-        return _.pick(this, 'to', 'from', 'body', 'options')
+        return _.pick(this, 'to', 'from', 'body', 'options');
     }
     , parent: function (n) {
         if (n !== 0) {
