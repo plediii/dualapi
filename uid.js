@@ -28,7 +28,7 @@ var digest = function (a, b) {
 var keygen = (function () {
     var keylen = 48;
     if (cryptoSupport) {
-        var uidsafe = require('uid-safe');
+        var uidsafe = Promise.method(require('uid-safe'));
         return function () {
             return uidsafe(keylen);
         };
