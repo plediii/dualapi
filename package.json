@@ -34,7 +34,7 @@
   },
   "dependencies": {
     "bluebird": "^2.2.2",
-    "hevemitter": "^0.9.1",
+    "hevemitter": "^0.9.3",
     "lodash": "^2.4.1",
     "uid-safe": "^1.0.2"
   }
