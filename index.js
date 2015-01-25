@@ -178,6 +178,7 @@ var mountParametrized = function (domain, point, host) {
             };
         }
     }
+    f.listener = host;
     domain.on(point, f);
 };
 
