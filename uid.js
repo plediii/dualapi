@@ -2,7 +2,6 @@
 /* global -Promise */
 "use strict";
 
-
 var crypto = require('crypto');
 var cryptoSupport = false;
 var Promise = require('bluebird');
@@ -16,12 +15,9 @@ catch (e) {
     console.error('Crypto RNG is not available: ', e);
 }
 
-var digest = function (a, b) {
+var digest = function (a) {
     var shasum = crypto.createHash('sha256');
     shasum.update(a);
-    if (b) {
-        shasum.update(b);
-    }
     return shasum.digest('hex');
 };
 
@@ -46,18 +42,19 @@ var keygen = (function () {
     }
 })();
 
+// would be awesome if this was secure
+var counter = 0;
+var previousUid = '';
 var key = keygen();
-var regen = _.throttle(function () {
+var regen = function () {
     return Promise.join(
         keygen()
         , key
         , function (newkey, oldkey) {
-            key = Promise.resolve(digest(oldkey, newkey));
+            key = Promise.resolve(digest(oldkey + newkey + previousUid));
         });
-}, 10000);
+};
 
-var counter = 0;
-var previousUid = '';
 
 module.exports = function () {
     return key.then(function (k) {
@@ -65,7 +62,7 @@ module.exports = function () {
         if (counter % 50 === 0) {
             regen();
         }
-        return previousUid;
+        return previousUid.slice(0, 32);
     });
 };
 
