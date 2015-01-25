@@ -48,11 +48,13 @@ var keygen = (function () {
 
 var key = keygen();
 var regen = _.throttle(function () {
-    keygen()
-        .then(function (newkey) {
-            key = Promise.resolve(digest(key, newkey));
+    return Promise.join(
+        keygen()
+        , key
+        , function (newkey, oldkey) {
+            key = Promise.resolve(digest(oldkey, newkey));
         });
-}, 60000);
+}, 10000);
 
 var counter = 0;
 var previousUid = '';
