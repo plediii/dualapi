@@ -86,6 +86,21 @@ describe('dualapi', function () {
             dual.send(['host']);
         });
 
+        it('should be removable via removeListener', function (done) {
+            var removable = function () {
+                done('should have been removed');
+            };
+            dual.mount(['guiness'], removable);
+
+            dual.mount(['guiness'], function () {
+                done();
+            });
+
+            dual.removeListener(['guiness'], removable);
+            dual.send(['guiness']);
+        });
+
+
         it('should be triggered with destination field in context', function (done) {
             dual.mount(['hostA'], function (ctxt) {
                 assert.deepEqual(ctxt.to, ['hostA']);
