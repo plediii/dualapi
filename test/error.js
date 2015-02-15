@@ -118,7 +118,6 @@ describe('dualapi', function () {
                 throw 'test';
             });
             d.mount(['done'], function () {
-                console.log('done...');
                 done();
             });
             d.send(['throwsError']);
