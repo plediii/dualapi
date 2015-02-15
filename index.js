@@ -351,6 +351,29 @@ _.extend(Domain.prototype, {
             remote.bridge(_this, fromRoutes);
         }
     }
+    , waitFor: function (route, options) {
+        var _this = this;
+        var domain = _this;
+        options = _.defaults({}, options, {
+            timeout: 0
+        });
+        return new Promise(function (resolve, reject) {
+            var timer;
+            var receiver = function (ctxt) {
+                if (timer) {
+                    clearTimeout(timer);
+                }
+                resolve(new MessageContext(ctxt));
+            };
+            domain.once(route, receiver);
+            if (options.timeout > 0) {
+                var timer = setTimeout(function () {
+                    domain.removeListener(route, receiver);
+                    reject(false);
+                }, 1000 * options.timeout);
+            }
+        });
+    }
 });
 
 module.exports = function () {
