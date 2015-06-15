@@ -1,4 +1,4 @@
-# DualAPI
+# DualAPI [![Build Status](http://jenkins.plediii.net:8080/buildStatus/icon?job=dualapi master)](http://jenkins.plediii.net:8080/job/dualapi%20master/)
 
 A simple, lightweight, distributed application framework inspired by restful HTTP architectures.
 
