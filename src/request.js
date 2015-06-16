@@ -16,6 +16,7 @@ module.exports = function (Domain) {
                 var ctxt = new _this.Message({
                     body: err
                     , options: { statusCode: 504 }
+                    , domain: _this
                 });
                 return [null, ctxt.options, ctxt];
             });
@@ -24,5 +25,9 @@ module.exports = function (Domain) {
             }
             return resp;
         });
-    }
+    };
+    Domain.prototype.Message.prototype.request = function () {
+        var d = this.domain;
+        return d.request.apply(d, arguments);
+    };
 };
