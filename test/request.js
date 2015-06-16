@@ -182,4 +182,22 @@ describe('request', function () {
         .catch(done);
     });
 
+    it('should add request convenience function', function (done) {
+        d.mount(['saw'], function (body, ctxt) {
+            ctxt.request(['resource'])
+            .spread(function (body) {
+                ctxt.send(ctxt.from, [], body);
+            })
+            .catch(done);
+        });
+        d.mount(['resource'], function (body, ctxt) {
+            ctxt.send(ctxt.from, [], 'vespene');
+        });
+        d.request(['saw']).spread(function (body) {
+            assert.equal('vespene', body);
+            done();
+        })
+        .catch(done);
+    });
+
 });
