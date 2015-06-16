@@ -161,4 +161,25 @@ describe('request', function () {
         .catch(done);
     });
 
+    it('should not leak listeners on timeout ', function (done) {
+        d.mount(['cleveland'], function (body, ctxt) {});
+        var initialCount = d.listeners('**').length;
+        d.request(['cleveland'], null, { timeout: 0.001 })
+            .spread(function (body, options) {
+                assert.equal(initialCount, d.listeners('**').length);
+                done();
+            })
+            .catch(done);
+    });
+
+    it('should not leak listeners on unavailable', function (done) {
+        var initialCount = d.listeners('**').length;
+        d.request(['cleveland'])
+            .spread(function (body, options) {
+                assert.equal(initialCount, d.listeners('**').length);
+                done();
+            })
+        .catch(done);
+    });
+
 });
