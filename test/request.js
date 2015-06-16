@@ -102,6 +102,17 @@ describe('request', function () {
             .catch(done);
     });
 
+
+    it('should have domain in timeout ctxt', function (done) {
+        d.mount(['cleveland'], function (body, ctxt) {});
+        d.request(['cleveland'], null, { timeout: 0.001 })
+            .spread(function (body, options, ctxt) {
+                assert.equal(d, ctxt.domain);
+                done();
+            })
+            .catch(done);
+    });
+
     it('should timeout in 1 seconds given a timeout option of 1', function (done) {
         d.mount(['cleveland'], function (body, ctxt) {});
         var before = Date.now();
