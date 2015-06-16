@@ -22,15 +22,18 @@ describe('return', function () {
         d.send(['nice']);
     });
 
-    // it('should send a message with from address/return', function (done) {
-    //     d.mount(['human'], function (body, ctxt) {
-    //         done();
-    //     });
-    //     d.mount(['nice'], function (body, ctxt) {
-    //         ctxt.return();
-    //     });
-    //     d.send(['nice'], ['human']);
-    // });
+    it('should send a message with unsendable address', function (done) {
+        d.mount(['human'], function (body, ctxt) {
+            assert.throws(function () {
+                ctxt.send(ctxt.from);
+            });
+            done();
+        });
+        d.mount(['nice'], function (body, ctxt) {
+            ctxt.return();
+        });
+        d.send(['nice'], ['human']);
+    });
 
     it('should send a message to the from address', function (done) {
         d.mount(['human'], function (body, ctxt) {
