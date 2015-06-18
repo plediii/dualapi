@@ -36,9 +36,9 @@
     "istanbul": "^0.3.14"
   },
   "dependencies": {
-    "bluebird": "^2.2.2",
-    "hevemitter": "^0.9.3",
-    "lodash": "^2.4.1",
-    "uid-safe": "^1.0.2"
+    "bluebird": "^2.9.30",
+    "dual-protocol": "0.0.1",
+    "hevemitter": "^1.1.0",
+    "lodash": "^3.9.3"
   }
 }

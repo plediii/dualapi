@@ -1,103 +1,136 @@
 /*jslint node: true */
 "use strict";
 
-var dualapi = require('../index');
 var _ = require('lodash');
 var assert = require('assert');
 
-describe('dualapi', function () {
+var dualproto = require('dual-protocol');
 
-    
-    describe('request', function () {
 
-        var dual;
-        beforeEach(function () {
-            dual = dualapi();
+describe('request', function () {
+
+    var d;
+    beforeEach(function () {
+        d = dualproto.use(require('../src/request'))();
+    });
+
+    it('should return a promise of the reply from another host', function () {
+        var r = d.request(['resource']);
+        assert(_.isFunction(r.then));
+    });
+
+    it('should return a spreadable promise', function () {
+        var r = d.request(['resource']);
+        assert(_.isFunction(r.spread));
+    });
+
+    it('should resolve when the host replies', function (done) {
+        d.mount(['resource'], function (body, ctxt) {
+            ctxt.send(ctxt.from);
+        });
+        d.request(['resource']).then(function () {
+            done();
+        });
+    });
+
+    it('should spread the host reply body as the first argument', function (done) {
+        d.mount(['resource'], function (body, ctxt) {
+            ctxt.send(ctxt.from, [], 'vespene');
+        });
+        d.request(['resource']).spread(function (body) {
+            assert.equal('vespene', body);
+            done();
+        })
+        .catch(done);
+    });
+
+
+    it('should spread the host reply options as the second argument', function (done) {
+        d.mount(['resource'], function (body, ctxt) {
+            ctxt.send(ctxt.from, [], 'vespene', { statusCode: 1000 });
+        });
+        d.request(['resource']).spread(function (body, options) {
+            assert.equal(1000, options.statusCode);
+            done();
+        })
+        .catch(done);
+    });
+
+
+    it('should spread ctxt to the third argument', function (done) {
+        d.mount(['resource'], function (body, ctxt) {
+            ctxt.send(ctxt.from, ['suede'], { doorbell: 'vespene' }, { statusCode: 1000 });
         });
 
-        it('should provide a promise of the reply from another host', function (done) {
-            dual.mount(['resource'], function (ctxt) {
-                ctxt.reply('vespene');
-            });
-
-            dual.request(['resource']).spread(function (body) {
-                assert.equal(body, 'vespene');
-                done();
-            })
+        d.request(['resource']).spread(function (body, options, ctxt) {
+            assert.deepEqual(['suede'], ctxt.from);
+            assert.deepEqual(ctxt.body, { doorbell: 'vespene' });
+            assert.deepEqual(ctxt.options, options);
+            done();
+        })
             .catch(done);
+    });
+
+    it('should send the second argument as ctxt.body', function (done) {
+        d.mount(['musician'], function (body, ctxt) {
+            assert.equal(ctxt.body, 'ten years');
+            ctxt.send(ctxt.from);
+            done();
         });
 
-        it('should spread the options to second argument', function (done) {
-            dual.mount(['resource'], function (ctxt) {
-                ctxt.reply('vespene', { statusCode: '1000' });
-            });
-
-            dual.request(['resource']).spread(function (body, options) {
-                assert.equal(options.statusCode, '1000');
-                done();
-            })
+        d.request(['musician'], 'ten years')
             .catch(done);
+    });
+
+    it('should send the third argument as options', function (done) {
+        d.mount(['scream'], function (body, ctxt) {
+            assert.equal(ctxt.options.corridor, 'thousand');
+            ctxt.send(ctxt.from);
+            done();
         });
+        d.request(['scream'], null, { corridor: 'thousand' })
+        .catch(done);
+    });
 
-        it('should spread get ctxt to the third argument', function (done) {
-            dual.mount(['resource'], function (ctxt) {
-                ctxt.reply('vespene', { statusCode: '1001' });
-            });
-
-            dual.request(['resource']).spread(function (body, options, ctxt) {
-                assert.deepEqual(['resource'], ctxt.from);
-                assert.deepEqual(ctxt.body, body);
-                assert.deepEqual(ctxt.options, options);
-                done();
-            })
-            .catch(done);
-        });
-
-
-        it('should send the message as ctxt.body', function (done) {
-            dual.mount(['musician'], function (ctxt) {
-                assert.equal(ctxt.body, 'ten years');
-                done();
-            });
-
-            dual.request(['musician'], 'ten years')
-                .catch(done);
-        });
-
-        it('should attach options', function (done) {
-            dual.mount(['scream'], function (ctxt) {
-                assert.equal(ctxt.options.corridor, 'thousand');
-                done();
-            });
-            dual.request(['scream'], null, { corridor: 'thousand' });
-        });
-
-        it('should timeout when given a timeout option', function (done) {
-            dual.mount(['cleveland'], function (ctxt) {});
-            dual.request(['cleveland'], null, { timeout: 1 })
+    it('should timeout with status code 504 when given a timeout option is provided and the host does not respond', function (done) {
+        d.mount(['cleveland'], function (body, ctxt) {});
+        d.request(['cleveland'], null, { timeout: 0.001 })
             .spread(function (body, options) {
-                assert.equal('408', options.statusCode);
+                assert.equal(504, options.statusCode);
                 done();
-            });
-        });
+            })
+            .catch(done);
+    });
 
-        it('should timeout in 1 seconds given a timeout option of 1', function (done) {
-            dual.mount(['cleveland'], function (ctxt) {});
-            var before = Date.now();
-            dual.request(['cleveland'], null, { timeout: 1 })
+
+    it('should have domain in timeout ctxt', function (done) {
+        d.mount(['cleveland'], function (body, ctxt) {});
+        d.request(['cleveland'], null, { timeout: 0.001 })
+            .spread(function (body, options, ctxt) {
+                assert.equal(d, ctxt.domain);
+                done();
+            })
+            .catch(done);
+    });
+
+    it('should timeout in 1 seconds given a timeout option of 1', function (done) {
+        d.mount(['cleveland'], function (body, ctxt) {});
+        var before = Date.now();
+        d.request(['cleveland'], null, { timeout: 1 })
             .spread(function () {
                 var after = Date.now();
                 assert(after - before >= 1000);
                 assert(after - before < 2000);
                 done();
-            });
-        });
+            })
+            .catch(done);
+    });
 
         // mocha needs a special option to do this test
         // it('should timeout in 2 seconds given a timeout option of 2', function (done) {
-        //     dual.mount(['cleveland'], function (ctxt) {});
+        //     d.mount(['cleveland'], function (ctxt) {});
         //     var before = Date.now();
-        //     dual.get(['cleveland'], null, { timeout: 2 })
+        //     d.get(['cleveland'], null, { timeout: 2 })
         //     .spread(function (ctxt) {
         //         var after = Date.now();
         //         assert(after - before > 2000);
@@ -106,40 +139,76 @@ describe('dualapi', function () {
         //     });
         // });
 
-        it('should not timeout when given a timeout option of 0', function (done) {
-            dual.mount(['cleveland'], function (ctxt) {
-                _.delay(function () {
-                    ctxt.reply('years ago');
-                }, 1500);
-            });
-            dual.request(['cleveland'], null, { timeout: 0 })
-            .spread(function (body) {
-                assert.equal(body, 'years ago');
-                done();
-            });
-        });
+    it('should not timeout when given a timeout option of 0', function (done) {
+        d.mount(['cleveland'], function (body, ctxt) {});
+        d.request(['cleveland'], null, { timeout: 0 })
+        .then(function () {
+            done('unexpected return');
+        })
+            .catch(done);
+        done();
+    });
 
-        it('should return unavailable statuscode when not received', function (done) {
-            dual.request(['cleveland'])
+    it('should return unavailable statusCode 503 when no host matches', function (done) {
+        d.request(['cleveland'])
             .spread(function (body, options) {
-                assert.equal(options.statusCode, '503');
+                assert.equal(503, options.statusCode);
                 done();
-            });
-        });
+            })
+        .catch(done);
+    });
 
-        it('should not leak request listeners', function (done) {
-            dual.mount(['dernier'], function (ctxt) {
-                ctxt.reply('voyage');
-            });
-            var initialCount = dual.listeners('**').length;
-            dual.request(['dernier'], 'last')
-                .spread(function (body) {
-                    assert.equal('voyage', body);
-                    assert.equal(initialCount, dual.listeners('**').length);
-                    done();
-                });
+    it('should not leak request listeners', function (done) {
+        d.mount(['dernier'], function (body, ctxt) {
+            ctxt.send(ctxt.from, [], 'voyage');
         });
+        var initialCount = d.listeners('**').length;
+        d.request(['dernier'], 'last')
+            .spread(function (body) {
+                assert.equal('voyage', body);
+                assert.equal(initialCount, d.listeners('**').length);
+                done();
+            })
+        .catch(done);
+    });
 
+    it('should not leak listeners on timeout ', function (done) {
+        d.mount(['cleveland'], function (body, ctxt) {});
+        var initialCount = d.listeners('**').length;
+        d.request(['cleveland'], null, { timeout: 0.001 })
+            .spread(function (body, options) {
+                assert.equal(initialCount, d.listeners('**').length);
+                done();
+            })
+            .catch(done);
+    });
+
+    it('should not leak listeners on unavailable', function (done) {
+        var initialCount = d.listeners('**').length;
+        d.request(['cleveland'])
+            .spread(function (body, options) {
+                assert.equal(initialCount, d.listeners('**').length);
+                done();
+            })
+        .catch(done);
+    });
+
+    it('should add request convenience function', function (done) {
+        d.mount(['saw'], function (body, ctxt) {
+            ctxt.request(['resource'])
+            .spread(function (body) {
+                ctxt.send(ctxt.from, [], body);
+            })
+            .catch(done);
+        });
+        d.mount(['resource'], function (body, ctxt) {
+            ctxt.send(ctxt.from, [], 'vespene');
+        });
+        d.request(['saw']).spread(function (body) {
+            assert.equal('vespene', body);
+            done();
+        })
+        .catch(done);
     });
 
 });
