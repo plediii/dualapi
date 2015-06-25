@@ -1,181 +1,157 @@
 # DualAPI [![Build Status](http://jenkins.plediii.net:8080/buildStatus/icon?job=dualapi master)](http://jenkins.plediii.net:8080/job/dualapi%20master/)
 
-A simple, lightweight, distributed application framework inspired by restful HTTP architectures.
+A lightweight and extensible framework for distributed isomorphic javascript
+applications.  DualAPI extends
+[dual-protocol](https://github.com/plediii/dual-protocol), adding
+convenience functions and default behaviors for common messaging
+patterns.
 
 ## Constructing domains
 
-DualAPI is centered around hosts mounted within domains.
-Communication within a domain is unrestricted, but cross domain
-communication must be performed by hosts.
-
-The dualapi module is the constructor for domains:
-```javascript
-var dualapi = require('dualapi');
-
-var domain = dualapi();
-```
-
-## Mounting a host
-
-Hosts are functions which accept a DualAPI message context.  Hosts are
-mounted hierarchically at url like addresses represented by arrays.
-```javascript
-domain.mount(['journal', ':name'], function (ctxt) {
-    console.log(ctxt.from.join('/') + ' published to the journal of ' + ctxt.params.name + ' : ', ctxt.body);
-});
-```
-
-## Sending messages
-
-Messages can be sent to hosts via the  `domain.send(to, from, body)` command.
-```javascript
-domain.send(['journal', 'bioinformatics'], ['scientist'], 'The Human Genome');
-```
-
-Sending the above message results in the output:
-```shell
-scientist published to the journal of bioinformatics :  The Human Genome
-```
-
-## Replying to messages
-
-Hosts naturally can communicate with one another.  DualAPI message
-context has convenience functions to facilitate this
-intercommunication.  
-
-For instance the reply command inverts the `to` and `from` addresses,
-and sends a new `body`.  The following host would reply to all senders
-by prepending a string to their body:
-```javascript
-domain.mount(['laboratory', 'supercomputer'], function (ctxt) {
-    ctxt.reply('Super Computed: ' + ctxt.body);
-});
-```
-
-Hosts may change their behavior based on the parameters associated
-with the message.  The following host will forward all messages to the
-`supercomputer`, unless the message is from the `supercompuer`, in
-which case the message is sent to be published. 
-```javascript
-domain.mount(['scientist'], function (ctxt) {
-    if (ctxt.from.join('/') === 'laboratory/supercomputer') {
-        domain.send(['journal', 'computation'], ['scientist'], ctxt.body);
-    }
-    else {
-        domain.send(['laboratory', 'supercomputer'], ['scientist'], ctxt.body);
-    }
-});
-```
-
-Messages sent to the scientist,
-```javascript
-domain.send(['scientist'], ['gradstudent'], 'sequence alignment');
-```
-would result in output such as
-```shell
-scientist published to the journal of computation :  Super Computed: sequence alignment
-```
-
-
-## Sending for reply only
-
- Note that in order to receive a reply, there must be a host mounted
-at the `from` address.  The `'gradstudent'` above would never be able
-to receive a message.
-
-The `domain.get` construct facilitiates sending messages for the
-purpose of receiving a reply by constructing an anonymous reply to
-address, and returning a promise for the response host.
+The `dualapi` module is the constructor for `dualapi` domains.
 
 ```javascript
-domain.get(['laboratory', 'supercomputer'], 'test data')
-.then(function (ctxt) {
-    console.log('super computer result: ', ctxt.body);
-});
+  var d = require('dualapi')();
 ```
 
-Producing the output:
-```shell
-super computer result:  Super Computed: test data
-```
-
-## Networked Hosts
-
-DualAPI domains may be connected across networks.  For instance via
-websockets.  
-
-### Server side
-
-Assuming the availability of `socket.io`, we could add a socket
-listener expecting a connection from alice:
-```javascript
-io.listen().on('connect', function (socket) {
-    domain.open(['alice'], socket);
-    domain.send(['alice', 'ready']);
-});
-```
-
-Upon any socket connection, the server would then transfer messages to
-`'alice'` to the socket, and translate messages coming over the socket
-to having a `from` address of `alice`.  
-
-Immediately after connecting the socket to the domain, a message will
-be sent to `ready` on the client domain.
-
-### Client side
-
-Then on the client side, Alice may construct her own domain, and use
-`socket.io` to connect to the server.
+The most common use case for `dualapi` domains is to provide
+a listener function for processing `dual-protocol` messages.  Hosts
+are attached to the domain by using the 
+[dual-protocol `mount` method](https://github.com/plediii/dual-protocol#constructing-dual-protocol-domains):
 
 ```javascript
-var aliceDomain = dualapi();
-var socket = io.connect();
-aliceDomain.open(['server'], socket);
+  d.mount(['unresponsive'], function (body, ctxt) {
+    // do some processing
+  });
 ```
 
-The server is set up to send a message to `ready` on successful
-connection.  Alice prepares to send a message to the `scientist` on
-the server above, immediately upon receipt.
+## Request and Return
+
+Often, a `dualapi` host will emit a response after processing 
+input.  `dualapi` provides a convienent extension to `dual-protocol`
+by providing the [`ctxt.return`](https://github.com/plediii/dualapi/blob/master/src/return.js) method.
 
 ```javascript
-aliceDomain.mount(['ready'], function () {
-    aliceDomain.send(['server', 'scientist'], ['tip'], 'Alice data');
-});
+  d.mount(['simpledb', 'get'], function (body, ctxt) {
+    ctxt.return('the processed response');
+  });
 ```
 
-On the server side then, we would see
-```shell
-scientist published to the journal of computation :  Super Computed: Alice data
-```
-
-Alice can create an alias for the server side `supercomputer`, by
-creating a host forwarding all such messages to the server.
+By default, `return` sets the returned `options.statusCode` to `200`.
+Then, any method having access to a connected domain may request data
+from this address.  The
+[request](https://github.com/plediii/dualapi/blob/master/src/request.js)
+method returns a spreadable promise which will be resolved when the
+source host replies:
 
 ```javascript
-aliceDomain.mount(['supercomputer'], function (ctxt) {
-    ctxt.forward(['server', 'laboratory', 'supercomputer']);
-});
-```
-
-When connected, Alice could then interact with her `supercomputer`
-alias the same way she would on the server:
-```javascript
-aliceDomain.mount(['ready'], function () {
-    aliceDomain.get(['supercomputer'], 'alice super computer data')
-    .then(function (ctxt) {
-        console.log('client side super computer: ', ctxt.body);
+  d.request(['simpledb', 'get'])
+    .spread(function (body, options) {
+       console.log(options.statusCode + ' ' + body);
     });
-});
+
+   // prints:
+   // "200 the processed response"
 ```
 
-Resulting in output on the client side:
-```shell
-client side super computer:  Super Computed: alice super computer data
+A smarter database can override the response `statusCode` by providing
+explicit options.
+
+```javascript
+  var db = {};
+  d.mount(['smarterdb', 'set', ':key'], function (body, ctxt) {
+    if (db.hasOwnProperty(ctxt.params.key)) {
+       ctxt.return('Conflict', { statusCode: 409 });
+    } else {
+       db[ctxt.params.key] = body;
+       ctxt.return('OK', { statusCode: 201 });
+    }
+  });
+
+  d.mount(['smarterdb', 'get', ':key'], function (body, ctxt) {
+    if (db.hasOwnProperty(ctxt.params.key)) {
+       ctxt.return(db[ctxt.params.key]);
+    } else {
+       ctxt.return('Not Found', { statusCode: 404 });
+    }
+  });
+
 ```
 
+A client can use the enhanced status codes to modify its own response:
+```javascript
 
+  d.request(['smarterdb', 'get', 'bucket'])
+      .spread(function (body, options) {
+         if (options.statusCode == 200) {
+            console.log('' + options.statusCode + ' Request returned: ' + body);
+         } else {
+            console.log('' + options.statusCode + ' Failed to retrieve from bucket.');
+         }
+      });
+      
+  d.request(['smarterdb', 'set', 'bucket'], 'an egg')
+      .spread(function (body, options) {
+         if (options.statusCode == 201) {
+            console.log('' + options.statusCode + ' Wrote to bucket');
+         } else {
+            console.log('' + options.statusCode + ' Failed to write to bucket.');
+         }
+      });
 
+  d.request(['smarterdb', 'get', 'bucket'])
+      .spread(function (body, options) {
+         if (options.statusCode == 200) {
+            console.log('' + options.statusCode + ' Second request got: ' + body);
+         } else {
+            console.log('' + options.statusCode + ' Second request failed to retrieve bucket.');
+         }
+      });
 
+  // Running this the first time would print:
+  // 404 Failed to retrieve from bucket
+  // 201 Wrote to bucket
+  // 200 Second request got: an egg
+
+  // Running a second time would print:
+  // 200 Request returned: an egg
+  // 409 Failed to write to bucket.
+  // 200 Second request got: an egg
+```
+
+On the other hand, if no host is listening at the requested address,
+request will return with a status code of `503`.  The request may also
+provide a timeout option, in which case the status code will be `504`.
+
+```javascript
+d.request(['nowhere'])
+    .spread(function (body, options) {
+        console.log('"nowhere" request returned status code ' + options.statusCode);
+    });
+
+// would print
+// "nowhere" request returned status code 503
+
+d.request(['unresponsive'], null, { timeout: 1 })
+    .spread(function (body, options) {
+        console.log('"unresponsive" request returned status code ' + options.statusCode);
+    });
+
+// would print (after 1 second delay)
+// "unresponsive" request returned status code 504
+```
+
+## Forward
+
+ To be written.
+
+## Proxy
+
+ To be written.
+
+## Error
+
+ To be written.
 
 
 
