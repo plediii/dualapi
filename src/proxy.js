@@ -23,7 +23,7 @@ module.exports = function (Domain) {
         return d.uid()
         .then(function (mailbox) {
             var from = ['proxy', mailbox];
-            var resp = d.waitFor(mailbox, { timeout: timeout })
+            var resp = d.waitFor(from, { timeout: timeout })
             .then(function (ctxt) {
                 return [ctxt.body, ctxt.options, ctxt];
             })
@@ -35,8 +35,8 @@ module.exports = function (Domain) {
                 });
                 return [null, ctxt.options, ctxt];
             });
-            if (!d.send(to, mailbox, _this.body)) {
-                d.send(mailbox, [], null, { statusCode: 503 })
+            if (!d.send(to, from, _this.body)) {
+                d.send(from, [], null, { statusCode: 503 })
             }
             return resp;
         });                
