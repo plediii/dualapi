@@ -8,7 +8,7 @@ module.exports = function (Domain) {
         return this.uid()
         .then(function (mailbox) {
             var from = ['request', mailbox];
-            var resp = _this.waitFor(mailbox, options)
+            var resp = _this.waitFor(from, options)
             .then(function (ctxt) {
                 return [ctxt.body, ctxt.options, ctxt];
             })
@@ -20,8 +20,8 @@ module.exports = function (Domain) {
                 });
                 return [null, ctxt.options, ctxt];
             });
-            if (!_this.send(to, mailbox, body, options)) {
-                _this.send(mailbox, [], null, { statusCode: 503 })
+            if (!_this.send(to, from, body, options)) {
+                _this.send(from, [], null, { statusCode: 503 })
             }
             return resp;
         });
