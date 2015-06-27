@@ -24,6 +24,14 @@ describe('request', function () {
         assert(_.isFunction(r.spread));
     });
 
+    it('should request with a welformed route', function (done) {
+        d.mount(['resource'], function (body, ctxt) {
+            assert(_.isArray(ctxt.from));
+            done();
+        });
+        var r = d.request(['resource']);
+    });
+
     it('should resolve when the host replies', function (done) {
         d.mount(['resource'], function (body, ctxt) {
             ctxt.send(ctxt.from);

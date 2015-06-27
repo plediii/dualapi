@@ -31,6 +31,17 @@ describe('proxy', function () {
         d.send(['nice']);
     });
 
+    it('should send a message to with well formed route', function (done) {
+        d.mount(['lumberjack'], function (body, ctxt) {
+            assert(_.isArray(ctxt.from));
+            done();
+        });
+        d.mount(['nice'], function (body, ctxt) {
+            ctxt.proxy(['lumberjack']);
+        });
+        d.send(['nice']);
+    });
+
     it('should return a spreadable promise', function (done) {
         d.mount(['nice'], function (body, ctxt) {
             assert(_.isFunction(ctxt.proxy(['lumberjack']).spread));
