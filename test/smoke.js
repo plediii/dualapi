@@ -60,6 +60,9 @@ describe('dualapi', function () {
             assert(_.isFunction(m.proxy));
         });
 
+        it('should have error', function () {
+            assert(_.isFunction(m.error));
+        });
     });
 
     describe('recycle dependencies', function () {
