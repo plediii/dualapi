@@ -7,4 +7,5 @@ module.exports = function (Domain) {
     require('./proxy')(Domain);
     require('./request')(Domain);
     require('./return')(Domain);
+    require('./error')(Domain);
 };
