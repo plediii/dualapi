@@ -6,6 +6,9 @@ applications.  DualAPI extends
 convenience functions and default behaviors for common messaging
 patterns.
 
+For a simple example distributed example, see the [dual-engine.io
+example](https://github.com/plediii/dual-engine.io/tree/master/example).
+
 ## Constructing domains
 
 The `dualapi` module is the constructor for `dualapi` domains.

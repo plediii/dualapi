@@ -64,18 +64,4 @@ describe('dualapi', function () {
             assert(_.isFunction(m.error));
         });
     });
-
-    describe('recycle dependencies', function () {
-        
-        it('should expose lodash', function () {
-            assert(dualapi._);
-        });
-
-        it('should expose bluebird', function () {
-            assert(dualapi.Promise);
-        });
-
-
-    });
-
 });
