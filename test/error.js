@@ -81,6 +81,70 @@ describe('error', function () {
         });
     });
 
+    it('should send accept non-object error', function (done) {
+        d.mount(['error', 'nice'], function (body) {
+            done();
+        });
+        d.mount(['nice'], function (body, ctxt) {
+            ctxt.error(10);
+        });
+        d.send({
+            to: ['nice']
+            , from: ['human']
+            , body: { been: 'happy' }
+            , options: { selling: 'point' }
+        });
+    });
+
+    it('should accept undefined error body', function (done) {
+        d.mount(['error', 'nice'], function (body) {
+            assert(body instanceof Error);
+            done();
+        });
+        d.mount(['nice'], function (body, ctxt) {
+            ctxt.error();
+        });
+        d.send({
+            to: ['nice']
+            , from: ['human']
+            , body: { been: 'happy' }
+            , options: { selling: 'point' }
+        });
+    });
+
+    it('should produce message for undefined error', function (done) {
+        d.mount(['error', 'nice'], function (body) {
+            assert(body.hasOwnProperty('message'));
+            done();
+        });
+        d.mount(['nice'], function (body, ctxt) {
+            ctxt.error();
+        });
+        d.send({
+            to: ['nice']
+            , from: ['human']
+            , body: { been: 'happy' }
+            , options: { selling: 'point' }
+        });
+    });
+
+    it('should convert non-object error to message', function (done) {
+        d.mount(['error', 'nice'], function (body) {
+            assert(body instanceof Error);
+            assert.equal(body.message, 10);
+            done();
+        });
+        d.mount(['nice'], function (body, ctxt) {
+            ctxt.error(10);
+        });
+        d.send({
+            to: ['nice']
+            , from: ['human']
+            , body: { been: 'happy' }
+            , options: { selling: 'point' }
+        });
+    });
+
     it('should send a message with second argument as options', function (done) {
         d.mount(['error', 'nice'], function (body, ctxt) {
             assert.deepEqual({ jealous: 'liam' }, ctxt.options);
