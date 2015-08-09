@@ -125,6 +125,19 @@ describe('proxy', function () {
         d.send(['nice']);
     });
 
+    it('should return readable message on timeout', function (done) {
+        d.mount(['lumberjack'], function (body, ctxt) {});
+        d.mount(['nice'], function (body, ctxt) {
+            ctxt.proxy(['lumberjack'], { timeout: 1 })
+                .spread(function (body, options, respCtxt) {
+                    assert(_.isString(body));
+                    done();
+                })
+                .catch(done);
+        });
+        d.send(['nice']);
+    });
+
     it('should timeout if given timeout in original options', function (done) {
         d.mount(['lumberjack'], function (body, ctxt) {});
         d.mount(['nice'], function (body, ctxt) {
@@ -216,6 +229,18 @@ describe('proxy', function () {
             ctxt.proxy(['lumberjack'])
                 .spread(function (body, options, ctxt) {
                     assert.equal(503, options.statusCode);
+                    done();
+                })
+                .catch(done);
+        });
+        d.send(['nice']);
+    });
+
+    it('should return readable message when no host matches', function (done) {
+        d.mount(['nice'], function (body, ctxt) {
+            ctxt.proxy(['lumberjack'])
+                .spread(function (body, options, ctxt) {
+                    assert(_.isString(body));
                     done();
                 })
                 .catch(done);
