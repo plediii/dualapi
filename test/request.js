@@ -110,6 +110,15 @@ describe('request', function () {
             .catch(done);
     });
 
+    it('should a readable message when a host does not respond', function (done) {
+        d.mount(['cleveland'], function (body, ctxt) {});
+        d.request(['cleveland'], null, { timeout: 0.001 })
+            .spread(function (body, options) {
+                assert(_.isString(body));
+                done();
+            })
+            .catch(done);
+    });
 
     it('should have domain in timeout ctxt', function (done) {
         d.mount(['cleveland'], function (body, ctxt) {});
@@ -161,6 +170,15 @@ describe('request', function () {
         d.request(['cleveland'])
             .spread(function (body, options) {
                 assert.equal(503, options.statusCode);
+                done();
+            })
+        .catch(done);
+    });
+
+    it('should return a readable message as body when no host matches', function (done) {
+        d.request(['cleveland'])
+            .spread(function (body, options) {
+                assert(_.isString(body));
                 done();
             })
         .catch(done);
