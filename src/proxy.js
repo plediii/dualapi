@@ -33,10 +33,10 @@ module.exports = function (Domain) {
                     , options: { statusCode: 504 }
                     , domain: d
                 });
-                return [null, ctxt.options, ctxt];
+                return ['Proxy request did not return in time ' + to.join('/'), ctxt.options, ctxt];
             });
             if (!d.send(to, from, _this.body)) {
-                d.send(from, [], null, { statusCode: 503 })
+                d.send(from, [], 'Proxy request unavailable ' + to.join('/'), { statusCode: 503 })
             }
             return resp;
         });                
