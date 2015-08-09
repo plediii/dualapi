@@ -18,10 +18,10 @@ module.exports = function (Domain) {
                     , options: { statusCode: 504 }
                     , domain: _this
                 });
-                return [null, ctxt.options, ctxt];
+                return ['Request did not return in time: ' + to.join('/'), ctxt.options, ctxt];
             });
             if (!_this.send(to, from, body, options)) {
-                _this.send(from, [], null, { statusCode: 503 })
+                _this.send(from, [], 'Service unavailable ' + to.join('/'), { statusCode: 503 })
             }
             return resp;
         });
