@@ -23,10 +23,15 @@ describe('return', function () {
     });
 
     it('should send a message with unsendable address', function (done) {
+        var sendCount = 0;
+        d.mount(['**'], function (body, ctxt) {
+            sendCount++;
+            if (sendCount > 2) {
+                done('Unexpected send: ' + JSON.stringify(ctxt));
+            }
+        });
         d.mount(['human'], function (body, ctxt) {
-            assert.throws(function () {
-                ctxt.send(ctxt.from);
-            });
+            ctxt.send(ctxt.from);
             done();
         });
         d.mount(['nice'], function (body, ctxt) {
