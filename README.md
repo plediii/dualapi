@@ -1,4 +1,4 @@
-# DualAPI [![Build Status](http://jenkins.plediii.net:8080/buildStatus/icon?job=dualapi master)](http://jenkins.plediii.net:8080/job/dualapi%20master/)
+# DualAPI [![Build Status](https://travis-ci.org/plediii/dualapi.svg)](https://travis-ci.org/plediii/dualapi)
 
 A lightweight and extensible framework for distributed isomorphic javascript
 applications.  DualAPI extends
