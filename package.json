@@ -37,6 +37,6 @@
     "tape": "^4.0.0"
   },
   "dependencies": {
-    "dual-protocol": "^0.4.3"
+    "dual-protocol": "^0.4.5"
   }
 }
